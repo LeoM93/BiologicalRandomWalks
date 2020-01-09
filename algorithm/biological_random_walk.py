@@ -74,6 +74,7 @@ class BiologicalRandomWalk(Algorithm):
 
 
             self.gene_expression_biological_walking_aggregation = self.algorithm_params['walking_parameters']['walking_aggregation_function']
+            self.gene_expression_biological_walking_threshold_co_expression_network = self.algorithm_params['walking_parameters']['threshold_pearson_correlation']
 
 
     def _compute_p_value(self,p_value,p_value_threshold):
@@ -85,16 +86,7 @@ class BiologicalRandomWalk(Algorithm):
 
         return p_value_set
 
-    def _compute_p_value_rank(self,):
 
-
-        dict_pval = {k:v[0] for k,v in self.teleporting_p_value.items()}
-        sorted_by_value = sorted(dict_pval.keys(), key=dict_pval.get)
-
-        p_value_dict = {k:self._inverse_sigmoid(i) for i,k in enumerate(sorted_by_value)}
-
-        self.sum_p_value_rank = sum(p_value_dict.values())
-        return p_value_dict
 
     def _compute_p_value_fdr_correction(self,p_value,p_value_threshold):
         p_value_set = set()
@@ -155,32 +147,27 @@ class BiologicalRandomWalk(Algorithm):
 
 
     def _set_graph_weights(self):
-        if self.algorithm_params['walking_parameters']['name'] == 'default':
-            self._compute_graph_weight()
+
+        if self.fdr_correction == 'false':
+            self.enriched_walking_set = self._compute_p_value(self.walking_p_value, self.walking_p_value_threshold)
 
         else:
-
-            if self.fdr_correction == 'false':
-                self.enriched_walking_set = self._compute_p_value(self.walking_p_value, self.walking_p_value_threshold)
-
-            else:
-                self.enriched_walking_set = self._compute_p_value_fdr_correction(self.walking_p_value,
+            self.enriched_walking_set = self._compute_p_value_fdr_correction(self.walking_p_value,
                                                                                  self.walking_p_value_threshold)
 
-            if len(self.enriched_walking_set) == 0:
-                self.enriched_walking_set = {}
+        if len(self.enriched_walking_set) == 0:
+            self.enriched_walking_set = {}
 
-            self._compute_graph_weight()
-
-
+        self._compute_graph_weight()
 
 
-    def _compute_graph_weight(self):
 
-        self.gene_to_gene_weight = {}
+
+    def _compute_default_graph_weight(self):
+        gene_to_gene_weight = {}
 
         for gene in self.G.ppi_network:
-            self.gene_to_gene_weight[gene] = {}
+            gene_to_gene_weight[gene] = {}
             neighbors = self.G.get_neighbors(gene)
 
             total_weight = 0
@@ -188,77 +175,153 @@ class BiologicalRandomWalk(Algorithm):
             for neighbor in neighbors:
 
                 if self.algorithm_params['walking_parameters']['edge_relevance'] == -1:
-                    self.gene_to_gene_weight[gene][neighbor] = 1
-                    total_weight+=1
-                    continue
+                    gene_to_gene_weight[gene][neighbor] = 1
+                    total_weight += 1
+
+            for neighbor in neighbors:
+                gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]/total_weight
+
+        return gene_to_gene_weight
+
+
+    def _compute_edge_relevance(self,intersection,union):
+
+        if self.algorithm_params['walking_parameters']['edge_relevance'] == 0:
+            intersection = len(intersection)
+            union = len(union)
+
+        elif self.algorithm_params['walking_parameters']['edge_relevance'] == 1:
+            intersection = len(intersection.intersection(self.enriched_walking_set))
+            union = len(union)
+
+        elif self.algorithm_params['walking_parameters']['edge_relevance'] == 2:
+
+            intersection = len(intersection.intersection(self.enriched_walking_set))
+            union = len(union.intersection(self.enriched_walking_set))
+
+        elif self.algorithm_params['walking_parameters']['edge_relevance'] == 3:
+            intersection = len(intersection.intersection(self.enriched_walking_set))
+            union = 1
+
+        else:
+            print()
+            print(" Edge Relevance: " + str(self.algorithm_params['walking_parameters']['edge_relevance']) +
+                  " is not a admissible option")
+            exit(3)
+
+        if union == 0:
+
+            return 0
+        else:
+            return intersection / union
+
+
+    def _compute_edge_score(self,edge_relevance_score):
+        if self.algorithm_params['walking_parameters']['edge_score'] == 'sum':
+
+            return 1 + edge_relevance_score
+        else:
+
+            print()
+            print(" Edge Score: " + self.algorithm_params['walking_parameters']['edge_scpore'] +
+                  " is not a admissible option")
+            exit(3)
+
+
+
+    def _compute_term_manager_graph_weight(self):
+        gene_to_gene_weight = {}
+
+        for gene in self.G.ppi_network:
+            gene_to_gene_weight[gene] = {}
+            neighbors = self.G.get_neighbors(gene)
+
+            total_weight = 0
+
+            for neighbor in neighbors:
 
                 gene_terms = self.walking_term_managet.find_gene_ontology(gene)
                 neighbor_terms = self.walking_term_managet.find_gene_ontology(neighbor)
 
                 if gene_terms == -1 or neighbor_terms == -1:
-                    self.gene_to_gene_weight[gene][neighbor] = 1
+                    gene_to_gene_weight[gene][neighbor] = 1
                     total_weight += 1
-                    continue
-
-                intersection = gene_terms.intersection(neighbor_terms)
-                union = gene_terms.union(neighbor_terms)
-
-
-                if self.algorithm_params['walking_parameters']['edge_relevance'] == 0:
-                    intersection = len(intersection)
-                    union = len(union)
-
-                elif self.algorithm_params['walking_parameters']['edge_relevance'] == 1:
-                    intersection = len(intersection.intersection(self.enriched_walking_set))
-                    union = len(union)
-
-
-                elif self.algorithm_params['walking_parameters']['edge_relevance'] == 2:
-
-                    intersection = len(intersection.intersection(self.enriched_walking_set))
-                    union = len(union.intersection(self.enriched_walking_set))
 
                 else:
 
-                    print()
-                    print(" Edge Relevance: " + str(self.algorithm_params['walking_parameters']['edge_relevance']) +
-                          " is not a admissible option")
-                    exit(3)
+                    intersection = gene_terms.intersection(neighbor_terms)
+                    union = gene_terms.union(neighbor_terms)
 
-                if union == 0:
-                    score = 0
-                else:
-                    score = intersection/union
+                    edge_relevance_score = self._compute_edge_relevance(intersection,union)
 
+                    edge_function_score = self._compute_edge_score(edge_relevance_score)
 
-                if self.algorithm_params['walking_parameters']['edge_score'] == 'sum':
+                    gene_to_gene_weight[gene][neighbor] = edge_function_score
+                    total_weight += gene_to_gene_weight[gene][neighbor]
 
-                    score = 1 + score
-                else:
-
-                    print()
-                    print(" Edge Score: " + self.algorithm_params['walking_parameters']['edge_scpore'] +
-                          " is not a admissible option")
-                    exit(3)
-
-
-                self.gene_to_gene_weight[gene][neighbor] = self._compute_graph_aggregated_weight(gene,neighbor,score)
-                total_weight += self.gene_to_gene_weight[gene][neighbor]
 
             for neighbor in neighbors:
+                gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]/total_weight
 
-                self.gene_to_gene_weight[gene][neighbor] = self.gene_to_gene_weight[gene][neighbor]/total_weight
+        return gene_to_gene_weight
 
 
-    def _compute_graph_aggregated_weight(self,gene,neighbor,biological_score):
+    def _compute_gene_expression_graph_weight(self):
 
-        if self.gene_expression_biological_walking_aggregation == "sum":
+        gene_to_gene_ge_weight = self.gene_expression_manager.load_weighted_gene_expression_adjacency_matrix(self.gene_expression_biological_walking_threshold_co_expression_network)
+        return gene_to_gene_ge_weight
 
-            final_score = biological_score + self.gene_expression_manager.find_gene_pearson_correlation_by_ppi_network(gene,neighbor)
-            return final_score
 
+    def _compute_graph_weight(self):
+
+        if self.algorithm_params['walking_parameters']['edge_relevance'] == -1 and self.algorithm_params['walking_parameters']['name'] == 'default':
+            self.gene_to_gene_weight = self._compute_default_graph_weight()
+
+        elif self.gene_expression_biological_walking_aggregation is "None":
+            self.gene_to_gene_weight = self._compute_term_manager_graph_weight()
         else:
-            return biological_score
+            self.gene_to_gene_weight = self.compute_aggregated_graph_weight()
+
+
+    def compute_aggregated_graph_weight(self):
+
+        gene_to_gene_term_weight = self._compute_term_manager_graph_weight()
+        gene_to_gene_ge_weight = self._compute_gene_expression_graph_weight()
+
+        gene_to_gene_weight = {}
+
+        for gene in self.G.ppi_network:
+            gene_to_gene_weight[gene] = {}
+
+            neighbors_ppi = gene_to_gene_term_weight[gene]
+            neighbors_correlation_network = {}
+
+            if gene in gene_to_gene_ge_weight:
+                neighbors_correlation_network = gene_to_gene_ge_weight[gene]
+
+            total_neighbors = set(neighbors_ppi.keys()).union(set(neighbors_correlation_network))
+            total_weight = 0
+
+            for neighbor in total_neighbors:
+
+                if neighbor in neighbors_ppi and neighbor in neighbors_correlation_network:
+                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_term_weight[gene][neighbor] + gene_to_gene_ge_weight[gene][neighbor]
+                    total_weight += gene_to_gene_weight[gene][neighbor]
+
+                elif neighbor in neighbors_ppi:
+
+                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_term_weight[gene][neighbor]
+                    total_weight += gene_to_gene_weight[gene][neighbor]
+
+                else:
+                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_ge_weight[gene][neighbor]
+                    total_weight += gene_to_gene_weight[gene][neighbor]
+
+            for neighbor in total_neighbors:
+                gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]/total_weight
+
+
+        return gene_to_gene_weight
 
 
     def _default(self):

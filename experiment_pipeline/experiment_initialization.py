@@ -144,10 +144,10 @@ class ExperimentInitialization():
 
         return kegg_manager
 
-    def _initialize_gene_expression(self,ppi_network_name, _list):
+    def _initialize_gene_expression(self,ppi_network_name, node_list):
 
         ge = GEManager(table=self.gene_expression_db,ppi_name = ppi_network_name)
-        ge.init_db(_list)
+        ge.init_db(node_list)
         ge.close_connection()
 
         return ge
@@ -266,7 +266,7 @@ class ExperimentInitialization():
             # enrichment analysis path for given disease id
             gene_ontology_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["go"])
             mirna_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["mirna"])
-
+            kegg_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["kegg"])
             if db_manager["random"] != None:
                 random_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["random"])
 
@@ -306,6 +306,9 @@ class ExperimentInitialization():
                 self._write_gene_ontology_p_value(disease,gene_ontology_enrichment_analysis_path,db_manager["go"],ppi_network,seed_set,str(i))
                 self._write_gene_ontology_p_value(disease,mirna_enrichment_analysis_path,db_manager["mirna"],ppi_network,seed_set,str(i))
 
+                #nuova aggiunta!
+                self._write_gene_ontology_p_value(disease,kegg_enrichment_analysis_path,db_manager["kegg"],ppi_network,seed_set,str(i))
+
                 if db_manager["random"] != None:
                     self._write_gene_ontology_p_value(disease,random_enrichment_analysis_path,db_manager["random"],ppi_network,seed_set,str(i))
 
@@ -342,7 +345,7 @@ class ExperimentInitialization():
         # create the ppi network
         ppi_network = self._initialize_ppi_network()
 
-        ppi_node_list = ppi_network.get_node_list()
+        ppi_node_list = set(ppi_network.get_node_list())
         ppi_edge_list = ppi_network.get_edge_list()
         ppi_name = ppi_network.ppi_name
 
@@ -359,13 +362,11 @@ class ExperimentInitialization():
         self._initialize_train_test_set(mapped_diseases,ppi_network,db_manager)
 
         # initialize z_score
-        gene_expression_manager = self._initialize_gene_expression(ppi_name,ppi_edge_list)
+        gene_expression_manager = self._initialize_gene_expression(ppi_name,ppi_node_list)
 
         self._initialize_algorithm_variables()
 
         return mapped_diseases,ppi_network,db_manager,gene_expression_manager
-
-
 
 
 

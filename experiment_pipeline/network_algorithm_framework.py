@@ -355,10 +355,15 @@ class NetworkAlgorithmFramework():
 
         try:
 
+
             walking_path = "walking_term_manager_" +self.algorithm_params['walking_parameters']['term_manager'].name + "/walking_p_val_" + str(
             self.algorithm_params['walking_parameters']['p_value_threshold'] * 100)[:3] \
                        + "/edge_" + str(self.algorithm_params['walking_parameters']['edge_relevance']) \
                        + "/edge_score_" + str(self.algorithm_params['walking_parameters']['edge_score']) + '/walking_aggregation_function_' + self.algorithm_params['walking_parameters']['walking_aggregation_function'] + "/"
+
+            if  self.algorithm_params['walking_parameters']['walking_aggregation_function'] != "None":
+                walking_path += "pearson_threshold_" + str(self.algorithm_params['walking_parameters']['threshold_pearson_correlation']) + "/"
+
 
         except KeyError:
             walking_path = ""

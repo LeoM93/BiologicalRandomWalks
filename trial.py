@@ -8,13 +8,13 @@ from utils.stats import Stats
 def run_all():
 
     run = False
-    validate = True
+    validate = False
     stats = False
 
 
     environment_params = {
 
-        'experiment_id': "brw_journal_experiments_breast_cancer_gene_expression_teleporting_final_omim_barabasi",
+        'experiment_id': "brw_journal_experiments_breast_cancer_gene_expression_final_omim_barabasi",
         'disease_dataset_name':"barabasi_omim",
 
 
@@ -71,6 +71,19 @@ def run_all():
             'disease_module_sizes': [10, 20, 40, 50, 60, 70, 80, 90, 100, 150, 200]
         }
 
+        val_f = ValidationFramework(diseases, environment_params, metrics_params)
+        val_f.validate_all(name="exploratory_analysis")
+
+        metrics_params = {
+            'validation_type': 'term_manager_validation',
+            'term_manager_name': 'go',
+            'term_manager': db_managers["go"],
+            'filter':'no_filter',
+            'metrics':'precision',
+            'p_value_threshold': 0.05,
+            'disease_module_sizes': [10, 20, 40, 50, 60, 70, 80, 90, 100, 150, 200]
+
+        }
         val_f = ValidationFramework(diseases, environment_params, metrics_params)
         val_f.validate_all(name="exploratory_analysis")
 

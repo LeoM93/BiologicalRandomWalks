@@ -5,7 +5,8 @@ import pandas as pd
 
 from utils.preferences import NETWORK_MEDICINE_PATH
 from validation.metrics_validation.metrics_validation import MetricsValidation
-from file_manager.file_loader import load_train_test_file,load_algorithm_ranked_list
+from validation.term_validation.term_validation import TermValidation
+from file_manager.file_loader import load_train_test_file,load_algorithm_ranked_list,load_disease_enrichment_analysis
 
 
 class ValidationFramework():
@@ -25,48 +26,33 @@ class ValidationFramework():
 
 
 
-    def _compute_metrics(self, current_algorithm_output_file_path, train_list, test_list):
+    def _compute_metrics(self, current_algorithm_output_file_path, train_list, current_disease_path,test_id):
 
         if self.metrics_params['validation_type'] == "train_test_validation":
+
+            current_test_file = current_disease_path + "test/" +test_id
+            test_list = load_train_test_file(current_test_file)
 
             output_algorithm = load_algorithm_ranked_list(current_algorithm_output_file_path,train_list,delimiter=",")
 
             metrics_validation = MetricsValidation(output_algorithm, test_list, self.metrics_params['disease_module_sizes'])
             recall_at_k = metrics_validation.compute_metrics(self.metrics_params['metrics'])
 
+            return recall_at_k
 
-        return recall_at_k
+        elif self.metrics_params['validation_type'] == "term_manager_validation":
 
+            enrichment_analysis_path = current_disease_path +"enrichment_analysis/" + self.metrics_params['term_manager_name'] + "/" + self.metrics_params["filter"] + "/" + test_id
+            p_value = load_disease_enrichment_analysis(enrichment_analysis_path)
+            output_algorithm = load_algorithm_ranked_list(current_algorithm_output_file_path,train_list,delimiter=",")
 
+            term_manager = self.metrics_params["term_manager"]
 
+            term_validation = TermValidation(output_algorithm,self.metrics_params['disease_module_sizes'],p_value,self.metrics_params["p_value_threshold"],term_manager)
 
-    def concatenate_all(self):
+            precision =  term_validation.compute_metrics()
 
-        for disease in self.diseases:
-            disease_id = disease.disease_id
-
-            self.current_disease_path = self.current_experiment_path + str(disease_id) +"/"
-
-            self.experiment_path = self.current_disease_path + "algo_outs/"
-
-            self.validation_path = self.current_disease_path + "validation_outputs/"
-
-            df = pd.DataFrame()
-
-            for item in os.listdir(self.validation_path):
-
-                if item == ".DS_Store":
-                    continue
-
-                current_df = pd.DataFrame.from_csv(self.validation_path + item)
-                df = pd.concat([df, current_df],axis=1)
-
-
-            df.to_csv(self.validation_path+ self.metrics_params['metrics'] + "_all.csv",index_label ='k')
-
-
-
-
+            return precision
 
 
     def validate_all(self,name = ""):
@@ -81,6 +67,7 @@ class ValidationFramework():
 
             train_directory_path = self.current_disease_path + "train/"
             test_directory_path = self.current_disease_path + "test/"
+
 
             train_files = os.listdir(train_directory_path)
 
@@ -125,17 +112,14 @@ class ValidationFramework():
                     algorithm_file_id = item.split("_")[-1]
 
                     current_train_file = train_directory_path + algorithm_file_id
-
-                    current_test_file = test_directory_path + algorithm_file_id
-
                     train_set = load_train_test_file(current_train_file)
-                    test_set = load_train_test_file(current_test_file)
+
                     try:
                         element_to_count += 1
-                        recall_at_k = self._compute_metrics(file_path, train_set, test_set)
+                        recall_at_k = self._compute_metrics(file_path, train_set, self.current_disease_path,algorithm_file_id)
                         result = result + recall_at_k
                     except Exception as e:
-                        pass
+                        print(e)
 
                 result = result / element_to_count
                 print(result)

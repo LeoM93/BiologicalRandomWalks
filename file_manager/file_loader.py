@@ -112,12 +112,13 @@ def load_gene_expression_z_score(file_path):
     return patient_list, z_score_dict
 
 
-def load_co_expression_network(file_path, is_direct):
+def filter_co_expression_network(file_path, node_list, pearson_correlation_threshold):
 
-    co_expression_network = {}
+    co_expression_adjacency_matrix = []
 
     with open(file_path,'rb') as file:
         csv_reader = csv.reader(file,delimiter=',')
+
         for index,row in enumerate(csv_reader):
             if index == 0:
                 continue
@@ -125,23 +126,53 @@ def load_co_expression_network(file_path, is_direct):
             gene_1 = row[0]
             gene_2 = row[1]
 
+            module_pearson_correlation = abs(float(row[2]))
+
+            if gene_1 in node_list and gene_2 in node_list:
+
+                if module_pearson_correlation > pearson_correlation_threshold:
+                    co_expression_adjacency_matrix.append([gene_1,gene_2,module_pearson_correlation])
+
+
+
+    return co_expression_adjacency_matrix
+
+
+def load_co_expression_network(file_path):
+
+    gene_to_gene_ge_weight = {}
+
+    with open(file_path,'rb') as file:
+        csv_reader = csv.reader(file,delimiter=',')
+
+        for index,row in enumerate(csv_reader):
+            if index == 0:
+                continue
+
+            gene_1 = row[0]
+            gene_2 = row[1]
             pearson_correlation = float(row[2])
-            p_value = float(row[3])
 
             try:
-                co_expression_network[gene_1][gene_2] = (pearson_correlation,p_value)
+                gene_to_gene_ge_weight[gene_1][gene_2] = pearson_correlation
             except KeyError:
-                co_expression_network[gene_1] = {gene_2:(pearson_correlation,p_value)}
+                gene_to_gene_ge_weight[gene_1] = { gene_2: pearson_correlation}
+
+            try:
+                gene_to_gene_ge_weight[gene_2][gene_1] = pearson_correlation
+            except KeyError:
+                gene_to_gene_ge_weight[gene_2] = { gene_1: pearson_correlation}
+
+    return gene_to_gene_ge_weight
 
 
-            if is_direct is False:
 
-                try:
-                    co_expression_network[gene_2][gene_1] = (pearson_correlation, p_value)
-                except KeyError:
-                    co_expression_network[gene_2] = {gene_1: (pearson_correlation, p_value)}
 
-    return co_expression_network
+
+
+
+
+
 
 
 ############################################### End  Gene Expression  ##################################################
