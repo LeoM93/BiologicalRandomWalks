@@ -184,6 +184,9 @@ class NetworkAlgorithmFramework():
                             elif teleporting['term_manager'] == "mirna":
                                 teleporting['term_manager'] = self.db_managers["mirna"]
 
+                            elif teleporting['term_manager'] == "kegg":
+                                teleporting['term_manager'] = self.db_managers["kegg"]
+
                             if teleporting["gene_expression"] == "TCGA":
                                 teleporting["gene_expression"] = self.gene_expression_manager
 
@@ -214,6 +217,10 @@ class NetworkAlgorithmFramework():
                             elif teleporting['term_manager'] == "mirna":
                                 teleporting['term_manager'] = self.db_managers["mirna"]
 
+                            elif teleporting['term_manager'] == "kegg":
+                                teleporting['term_manager'] = self.db_managers["kegg"]
+
+
                             if teleporting["gene_expression"] == "TCGA":
                                 teleporting["gene_expression"] = self.gene_expression_manager
 
@@ -222,6 +229,9 @@ class NetworkAlgorithmFramework():
 
                             elif walking['term_manager'] == "mirna":
                                 walking['term_manager'] = self.db_managers["mirna"]
+
+                            elif walking['term_manager'] == "kegg":
+                                walking['term_manager'] = self.db_managers["kegg"]
 
 
 
@@ -334,6 +344,7 @@ class NetworkAlgorithmFramework():
         t_par = self.algorithm_params['teleporting_parameters']
 
 
+
         term_manager_teleporting_path = "teleporting_term_manager_"+ self.algorithm_params['teleporting_parameters']['term_manager'].name + "/fdr_" + \
                            self.algorithm_params['fdr_correction'] + "/teleporting_p_val_" + \
                            str(self.algorithm_params['teleporting_parameters']['p_value_threshold'] * 100)[
@@ -422,7 +433,7 @@ class NetworkAlgorithmFramework():
 
         term_manager_file_path =  self.experiment_path + str(disease_id) + "/algo_outs/" + "btp/" + \
                            self.algorithm_params['term_manager'].name+ "/p_val_" + \
-                               str(self.algorithm_params['p_value_threshold']*100)[:3] + "/" + self.algorithm_params[
+                               str(self.algorithm_params['p_value_threshold']) + "/" + self.algorithm_params[
                                'metrics']
 
         output_file_path += term_manager_file_path

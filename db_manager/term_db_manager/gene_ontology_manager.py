@@ -1,7 +1,7 @@
 from db_manager.db_manager import DBManager
 from db_manager.term_db_manager.term_manager import TermManager
 from utils.preferences import NETWORK_MEDICINE_PATH
-
+from file_manager.file_loader import load_gene_ensembl_id_from_disk
 
 class GeneOntologyManager(TermManager):
     def __init__(self,name,term_description = "biological_process"):
@@ -60,7 +60,7 @@ class GeneOntologyManager(TermManager):
         term_table_query = "SELECT * FROM terms"
         term_table = self.gene_ontology_db_manager.comupute_query(term_table_query, None)
         self.term = {}
-
+        self.term_description_by_term_id = {}
         for record in term_table:
             term_description = record[1]
             if term_description == self.term_description:
@@ -77,7 +77,10 @@ class GeneOntologyManager(TermManager):
 
         for gene in gene_list:
             try:
+
                 gene_product_ids = self.gene_product_dictionary[gene]
+
+
                 for gene_product_id in gene_product_ids:
 
                     try:

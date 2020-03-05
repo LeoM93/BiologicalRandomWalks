@@ -8,8 +8,8 @@ from db_manager.term_db_manager.gene_ontology_manager import GeneOntologyManager
 from db_manager.term_db_manager.mirna_manager import MirnaManager
 from db_manager.term_db_manager.kegg_manager import KeggManager
 from db_manager.term_db_manager.random_term_manager import RandomTermManager
-
-
+from db_manager.gwas_db_manager.gwas_db_manager import GWASManager
+from db_manager.term_db_manager.drug_bank_db_manager import DrugBankManager
 from enrichment_analysis.enrichment_analysis import EnrichmentAnalysis
 
 from processing.preprocessing import check_input_disease,split_train_test_set
@@ -44,6 +44,9 @@ class ExperimentInitialization():
         #kegg pathways database to use
         self.kegg_db = environment_params['kegg_db']
 
+        # gwas table
+        self.gwas_table = environment_params["gwas_collection_table"]
+
         # gene expression
         self.gene_expression_db = environment_params["gene_expression_db"]
 
@@ -61,6 +64,7 @@ class ExperimentInitialization():
 
         # train percentuage
         self.train_percentuage = environment_params["train_percentuage"]
+
 
 
     def _compute_enrichment_analysis_path(self,disease_id_str,db_manager):
@@ -86,10 +90,13 @@ class ExperimentInitialization():
         gene_ontology_db_manager = self._initialize_gene_ontology_db(node_list)
         mirna_db_manager = self._initialize_microRNA_db(node_list)
         kegg_manager = self._initialize_kegg_db(node_list)
+        drug_bank_manager = self._initialize_drug_bank_db(node_list)
+
 
         gene_ontology_db_manager.close_connection()
         mirna_db_manager.close_connection()
         kegg_manager.close_connection()
+        drug_bank_manager.close_connection()
 
         if self.term_manager_randomization != None:
             randomize_db = SwitchingAlgorithm()
@@ -113,10 +120,12 @@ class ExperimentInitialization():
         else:
             random_term_manager = None
 
+
         db_managers = {
             "go": gene_ontology_db_manager,
             "mirna": mirna_db_manager,
             "kegg":kegg_manager,
+            "drug_bank": drug_bank_manager,
             "random":random_term_manager
         }
 
@@ -129,6 +138,18 @@ class ExperimentInitialization():
 
         return gene_ontology_manager
 
+    def _initialize_drug_bank_db(self,node_list):
+        drug_bank_manager = DrugBankManager(name="drug_bank",table="drug_bank")
+        drug_bank_manager.init_db(node_list)
+
+        return drug_bank_manager
+
+    def _initialize_gwas_db(self):
+        gwas_manager = GWASManager(self.gwas_table)
+        gwas_manager.init_db()
+        gwas_manager.close_connection()
+
+        return gwas_manager
 
 
     def _initialize_microRNA_db(self,node_list):
@@ -154,30 +175,17 @@ class ExperimentInitialization():
 
     def _initialize_diseases(self,node_list):
         disease_manager = DiseaseManager(self.omim_name)
-
-
         mapped_diseases = []
 
-        if len(self.disease_ids) == 0:
-            diseases = disease_manager.select_all_disease()
 
-            for disease in diseases:
-                mapped_disease = check_input_disease(disease, node_list)
-                mapped_diseases.append(mapped_disease)
+        for disease_id in self.disease_ids:
+            disease = disease_manager.select_disease(disease_id)
 
-            return mapped_diseases
+            mapped_disease = check_input_disease(disease,node_list)
 
+            mapped_diseases.append(mapped_disease)
 
-        else:
-
-            for disease_id in self.disease_ids:
-                disease = disease_manager.select_disease(disease_id)
-
-                mapped_disease = check_input_disease(disease,node_list)
-
-                mapped_diseases.append(mapped_disease)
-
-            return mapped_diseases
+        return mapped_diseases
 
 
 
@@ -185,7 +193,7 @@ class ExperimentInitialization():
         ppi_network_manager = PPIManager(self.ppi_name)
         adjacency_list = ppi_network_manager.select_ppi_network()
 
-        ppi_network = PPINetwork(ppi_name=self.ppi_name, adjacency_matrix=adjacency_list)
+        ppi_network = PPINetwork(ppi_name=self.ppi_name, adjacency_matrix=adjacency_list,)
 
 
         if self.ppi_randomization:
@@ -267,6 +275,9 @@ class ExperimentInitialization():
             gene_ontology_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["go"])
             mirna_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["mirna"])
             kegg_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["kegg"])
+            #drug_bank_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["drug_bank"])
+
+
             if db_manager["random"] != None:
                 random_enrichment_analysis_path = self._compute_enrichment_analysis_path(disease_id_str,db_manager["random"])
 
@@ -281,6 +292,29 @@ class ExperimentInitialization():
             elif len(os.listdir(train_path)) < self.num_of_trial:
                 starting_point  = int(max(os.listdir(train_path)))+1
                 print("Starting from trial n: ", starting_point)
+
+            elif len(os.listdir(train_path)) == self.num_of_trial and len(os.listdir(test_path)) == self.num_of_trial:
+
+
+
+                for i in range(self.num_of_trial):
+                    train_file_path = train_path + "/" + str(i)
+
+                    train_list = load_train_test_file(train_file_path)
+
+
+                    self._write_gene_ontology_p_value(disease, gene_ontology_enrichment_analysis_path, db_manager["go"],
+                                                      ppi_network, train_list, str(i))
+                    self._write_gene_ontology_p_value(disease, mirna_enrichment_analysis_path, db_manager["mirna"],
+                                                      ppi_network, train_list, str(i))
+                    self._write_gene_ontology_p_value(disease, kegg_enrichment_analysis_path, db_manager["kegg"],
+                                                      ppi_network, train_list, str(i))
+
+                    #self._write_gene_ontology_p_value(disease, drug_bank_enrichment_analysis_path, db_manager["drug_bank"],
+                     #                                 ppi_network, train_list, str(i))
+
+
+                continue
 
             else:
                 print("No FILE WILL BE CREATED BECAUSE N. OF FOLDS LOWER/GREATER FROM N. OF TRAIN")
@@ -305,10 +339,9 @@ class ExperimentInitialization():
 
                 self._write_gene_ontology_p_value(disease,gene_ontology_enrichment_analysis_path,db_manager["go"],ppi_network,seed_set,str(i))
                 self._write_gene_ontology_p_value(disease,mirna_enrichment_analysis_path,db_manager["mirna"],ppi_network,seed_set,str(i))
-
-                #nuova aggiunta!
                 self._write_gene_ontology_p_value(disease,kegg_enrichment_analysis_path,db_manager["kegg"],ppi_network,seed_set,str(i))
-
+                #self._write_gene_ontology_p_value(disease, drug_bank_enrichment_analysis_path, db_manager["drug_bank"],
+                 #                                 ppi_network, train_list, str(i))
                 if db_manager["random"] != None:
                     self._write_gene_ontology_p_value(disease,random_enrichment_analysis_path,db_manager["random"],ppi_network,seed_set,str(i))
 
@@ -364,9 +397,13 @@ class ExperimentInitialization():
         # initialize z_score
         gene_expression_manager = self._initialize_gene_expression(ppi_name,ppi_node_list)
 
+
+        # gwas clollection manager
+        gwas_collection_manager = self._initialize_gwas_db()
+
         self._initialize_algorithm_variables()
 
-        return mapped_diseases,ppi_network,db_manager,gene_expression_manager
+        return mapped_diseases,ppi_network,db_manager,gene_expression_manager,gwas_collection_manager
 
 
 

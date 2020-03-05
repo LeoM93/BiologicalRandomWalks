@@ -2,13 +2,14 @@ from processing.p_value_correction import fdr_correction
 
 class TermValidation():
 
-    def __init__(self, ranked_list, disease_module_size, p_value, p_value_threshold,term_manager):
+    def __init__(self, ranked_list, disease_module_size, p_value, p_value_threshold,term_manager,term_counter):
 
         self.ranked_list = ranked_list
         self.disease_module_size = disease_module_size
         self.p_value = p_value
         self.p_value_threshold = p_value_threshold
         self.term_manager = term_manager
+        self.term_counter = term_counter
 
 
 
@@ -40,12 +41,15 @@ class TermValidation():
             rank = index + 1
 
             term_gene = self.term_manager.find_gene_ontology(gene)
+            term_counter = 0
 
             if term_gene != -1:
                 for term in term_gene:
                     if term in p_value:
-                        precision += 1
-                        break
+                        term_counter += 1
+            if term_counter >= self.term_counter:
+                precision += 1
+
 
             if rank in self.disease_module_size:
                 precision_at_k.append(precision / rank )

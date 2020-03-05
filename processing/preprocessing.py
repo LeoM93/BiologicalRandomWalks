@@ -1,12 +1,13 @@
 import random
 from utils.disease import Disease
 
-def check_input_disease(disease,node_list):
+def check_input_disease(disease,node_list,):
     # use as seed nodes only the nodes that have a mapping in the ppi network
     checked_disease_genes = []
     unmapped_genes = []
 
     for gene in disease.disease_genes:
+
         if gene in node_list:
             checked_disease_genes.append(gene)
         else:

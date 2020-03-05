@@ -1,10 +1,11 @@
 from db_manager.db_manager import DBManager
 from utils.preferences import NETWORK_MEDICINE_PATH
 from file_manager.file_writer import write_data_on_disk,write_row_on_disk
-from file_manager.file_loader import load_gene_expression_z_score,filter_co_expression_network,load_co_expression_network
+from file_manager.file_loader import load_gene_expression_z_score,filter_co_expression_network,load_co_expression_network,load_independent_t_test
 
 import math
 from scipy.stats import pearsonr
+import scipy
 
 import os
 class GEManager():
@@ -19,6 +20,9 @@ class GEManager():
         self.ppi_name = ppi_name
 
         self.z_score_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/" + self.db_table + "_z_score.csv"
+
+        self.differential_expression_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/" + self.db_table + "_differential_expression_independent_t_test.csv"
+
         self.co_expression_by_z_score_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/" + self.db_table + "_co_expression_network_pearson_correlation_by_z_score.csv"
 
         self.pearson_correlation_threshold = pearson_correlation_threshold
@@ -30,6 +34,7 @@ class GEManager():
     def init_db(self,node_list):
 
         self.load_z_score()
+        self.load_differential_expression_statistics()
         self.write_co_expression_network(node_list)
 
 
@@ -38,13 +43,22 @@ class GEManager():
         del self.ge_db_manager
 
 
-    def load_z_score(self):
+    def load_z_score(self,):
 
         if os.path.exists(self.z_score_file_path):
             self.patients, self.z_score = load_gene_expression_z_score(self.z_score_file_path)
         else:
             self._generate_z_score()
             self.patients, self.z_score = load_gene_expression_z_score(self.z_score_file_path)
+
+
+    def load_differential_expression_statistics(self):
+
+        if os.path.exists(self.differential_expression_file_path):
+            self.independent_t_test,self.rank_by_t_test = load_independent_t_test(self.differential_expression_file_path)
+        else:
+            self._generate_independent_t_test()
+
 
 
 
@@ -116,6 +130,10 @@ class GEManager():
         else:
             return -1
 
+    def find_gene_ranking_by_independent_t_test(self):
+
+        return -1
+
 
     def _generate_z_score(self):
 
@@ -130,8 +148,6 @@ class GEManager():
 
         gene_expression_by_tumor_patients = {}
         gene_expression_by_sane_patients = {}
-
-
 
 
         for item in tcga_table:
@@ -220,5 +236,83 @@ class GEManager():
             z_score_table.append(record)
 
         write_data_on_disk(self.z_score_file_path,headers=patient_ids,rows=z_score_table)
+
+
+    def _generate_independent_t_test(self):
+
+        if self.db_table != 'TGCA_2014':
+            print()
+            print("IT IS POSSIBLE TO USE THIS OPTION ONLY WITH " + self.db_table + " TABLE")
+            exit(12)
+
+        gene_expression_query_selection = "SELECT * FROM " + self.db_table
+        tcga_table = self.ge_db_manager.comupute_query(gene_expression_query_selection, record=None)
+
+        gene_expression_by_tumor_patients = {}
+        gene_expression_by_sane_patients = {}
+
+        for item in tcga_table:
+
+            gene_name = item[0]
+            gene_expression = item[1]
+            cell_type = item[2]
+            patient_id = item[3]
+
+            if cell_type == "TUMOR":
+                try:
+                    gene_expression_by_tumor_patients[patient_id][gene_name] = gene_expression
+                except KeyError:
+                    gene_expression_by_tumor_patients[patient_id] = {gene_name: gene_expression}
+            else:
+                try:
+                    gene_expression_by_sane_patients[patient_id][gene_name] = gene_expression
+                except KeyError:
+                    gene_expression_by_sane_patients[patient_id] = {gene_name: gene_expression}
+
+        mean_by_sane_gene_name = {}
+        mean_by_tumor_gene_name = {}
+
+        healthy_group_gene_expression_by_gene_name = {}
+        tumor_group_gene_expression_by_gene_name = {}
+
+        x_i = {}
+
+        num_sane_patients = len(gene_expression_by_sane_patients.keys())
+        num_tumor_patients = len(gene_expression_by_tumor_patients)
+
+        for patient, gene_expression in gene_expression_by_sane_patients.items():
+
+            for gene, value in gene_expression.items():
+                try:
+
+                    mean_by_sane_gene_name[gene] += value
+                    healthy_group_gene_expression_by_gene_name[gene].append(value)
+
+                except KeyError:
+
+                    healthy_group_gene_expression_by_gene_name[gene] = [value]
+                    mean_by_sane_gene_name[gene] = value
+
+
+        for patient, gene_expression in gene_expression_by_tumor_patients.items():
+
+            for gene, value in gene_expression.items():
+                try:
+                    mean_by_tumor_gene_name[gene] += value
+                    tumor_group_gene_expression_by_gene_name[gene].append(value)
+                except KeyError:
+                    tumor_group_gene_expression_by_gene_name[gene] = [value]
+                    mean_by_tumor_gene_name[gene] = value
+
+
+        for gene in mean_by_tumor_gene_name.keys():
+            mean_by_tumor_gene_name[gene] = mean_by_tumor_gene_name[gene]/num_tumor_patients
+
+        gene_table = []
+        for gene, value in tumor_group_gene_expression_by_gene_name.items():
+            p_value = scipy.stats.ttest_ind(healthy_group_gene_expression_by_gene_name[gene], tumor_group_gene_expression_by_gene_name[gene], axis=0, equal_var=False)[1]
+            gene_table.append([gene, p_value, mean_by_tumor_gene_name[gene]])
+
+        write_data_on_disk(self.differential_expression_file_path,headers=["Gene","P-Value","Mean"],rows=gene_table)
         
 

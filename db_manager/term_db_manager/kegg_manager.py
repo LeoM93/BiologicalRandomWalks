@@ -2,7 +2,6 @@ from db_manager.db_manager import DBManager
 from db_manager.term_db_manager.term_manager import TermManager
 from utils.preferences import NETWORK_MEDICINE_PATH
 
-
 class KeggManager(TermManager):
     def __init__(self,name,table):
         TermManager.__init__(self,name)
@@ -19,7 +18,6 @@ class KeggManager(TermManager):
         self.term_to_gene = {}
 
         gene_set = set(gene_list)
-
 
         for record in kegg_table:
             gene_name = record[1]

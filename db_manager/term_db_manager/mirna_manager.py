@@ -1,7 +1,7 @@
 from db_manager.db_manager import DBManager
 from db_manager.term_db_manager.term_manager import TermManager
 from utils.preferences import NETWORK_MEDICINE_PATH
-
+from file_manager.file_loader import load_gene_ensembl_id_from_disk
 class MirnaManager(TermManager):
     def __init__(self, table,name):
 
@@ -21,9 +21,11 @@ class MirnaManager(TermManager):
         gene_set = set(gene_list)
 
 
+
         for record in mirna_table:
             gene_name = record[2]
             mirna_name = record[1]
+
 
             if gene_name in gene_set:
 

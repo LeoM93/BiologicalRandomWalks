@@ -26,21 +26,21 @@ brw = [
           ],
 
            "gene_expression_normalization":[
-             "seed_specific_co_expression_network","z_score"
+             "log_z_score_base_2"
            ],
 
            "gene_expression_function":[
-             "max","l_2"
+             "absolute_max"
            ],
            "teleporting_aggregation_function":[
-             "union","product"
+             "sum"
            ],
            "gene_expression_coefficient":[
              0.5
            ],
 
            "term_manager_coefficient":[
-             0.5
+            0.5
            ],
 
            "term_manager": [
@@ -51,28 +51,18 @@ brw = [
            ],
 
            "restart_probability": [
-              0.7
+              0.9
            ],
            "node_relevance": [
-              "intersection"
+              "weighted_intersection"
            ],
            "clip_t": [
-                0.2
+                1
            ],
            "score_function": {
-              "name": "ranking",
+              "name": "default",
 
               "parameters": {
-
-                 "function_ranking_score": [
-                    "inv_sig"
-                 ],
-                 "steep": [
-                    0.01
-                 ],
-                 "translation": [
-                    100
-                 ]
               }
            }
         },
@@ -87,13 +77,17 @@ brw = [
               0.05
            ],
            "edge_relevance": [
-              1
+              3
            ],
            "edge_score": [
               "sum"
            ],
+           "threshold_pearson_correlation": [
+             0.8
+           ],
+
            "walking_aggregation_function":[
-             "sum","None"
+             "sum"
            ]
         }
      }
@@ -101,12 +95,10 @@ brw = [
 
 
 
-
-
 rwr = [
     {
         "algorithm": "rwr",
-        "restart_probability": 0.25
+        "restart_probability": 0.75
     }
 ]
 
@@ -120,7 +112,7 @@ btp =[
       "gene_expression_manager":"TCGA",
       "gene_expression_function":"l_1",
       "gene_expression_normalization":"seed_specific_co_expression_network",
-      "gene_expression_aggregation_function":"sum",
+      "gene_expression_aggregation_function":"None",
       "fdr_correction": 1
    }
 ]

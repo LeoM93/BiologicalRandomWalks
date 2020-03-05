@@ -6,10 +6,12 @@ import pandas as pd
 from utils.preferences import NETWORK_MEDICINE_PATH
 from validation.metrics_validation.metrics_validation import MetricsValidation
 from validation.term_validation.term_validation import TermValidation
+from validation.GWAS_validation.gwas_validation import GWASValidation
 from file_manager.file_loader import load_train_test_file,load_algorithm_ranked_list,load_disease_enrichment_analysis
-
+from file_manager.file_writer import write_data_on_disk
 
 class ValidationFramework():
+
     def __init__(self,diseases,environment_params,metrics_params,):
         self.diseases = diseases
 
@@ -48,11 +50,28 @@ class ValidationFramework():
 
             term_manager = self.metrics_params["term_manager"]
 
-            term_validation = TermValidation(output_algorithm,self.metrics_params['disease_module_sizes'],p_value,self.metrics_params["p_value_threshold"],term_manager)
+            term_validation = TermValidation(output_algorithm,self.metrics_params['disease_module_sizes'],p_value,self.metrics_params["p_value_threshold"],term_manager,self.metrics_params['term_counter'])
 
             precision =  term_validation.compute_metrics()
 
             return precision
+
+        elif self.metrics_params['validation_type'] == "gwas_validation":
+
+            gwas_manager = self.metrics_params["gwas_manager"]
+            output_algorithm = load_algorithm_ranked_list(current_algorithm_output_file_path,train_list,delimiter=",")
+
+            gwas_validation = GWASValidation(output_algorithm,self.metrics_params['disease_module_sizes'],gwas_manager)
+            precision = gwas_validation.compute_metrics()
+
+            return precision
+
+
+
+
+
+
+
 
 
     def validate_all(self,name = ""):
@@ -68,6 +87,8 @@ class ValidationFramework():
             train_directory_path = self.current_disease_path + "train/"
             test_directory_path = self.current_disease_path + "test/"
 
+            self.racall_by_trial_id_file_path = self.validation_path
+            recall_by_trial_table = []
 
             train_files = os.listdir(train_directory_path)
 
@@ -96,7 +117,6 @@ class ValidationFramework():
 
                     if item == "algo_outs":
                         name_flag = True
-                #print(file_name)
 
                 if len(train_files) != len(v):
                     print("N. OF TRAIN FILES DIFFERENT FROM N. OF OUTPUT OF CURRENT ALGORITHM")
@@ -115,9 +135,10 @@ class ValidationFramework():
                     train_set = load_train_test_file(current_train_file)
 
                     try:
-                        element_to_count += 1
                         recall_at_k = self._compute_metrics(file_path, train_set, self.current_disease_path,algorithm_file_id)
+                        recall_by_trial_table.append(recall_at_k)
                         result = result + recall_at_k
+                        element_to_count += 1
                     except Exception as e:
                         print(e)
 
@@ -125,7 +146,7 @@ class ValidationFramework():
                 print(result)
                 results[file_name] = result
 
-
+            write_data_on_disk(self.validation_path + self.metrics_params['metrics']+".csv" ,recall_by_trial_table,headers=None)
             pd.DataFrame(results, index = self.metrics_params['disease_module_sizes']).to_csv(self.validation_path +name+"_"+ self.metrics_params['metrics'] + ".csv",index_label ='k')
 
 

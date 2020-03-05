@@ -1,7 +1,9 @@
 import unicodecsv as csv
 import json
 import os
+import operator
 
+from utils.preferences import NETWORK_MEDICINE_PATH
 
 
 class LoadAlgorithmVariables():
@@ -45,7 +47,6 @@ def load_train_test_file(file_path):
 ############################################## Validation #############################################################
 def load_algorithm_ranked_list(file_path, seed_set,delimiter =","):
     algorithm_output = []
-    print(file_path)
     with open(file_path, 'rb') as file:
 
         tsv_reader = csv.reader(file, delimiter=delimiter)
@@ -86,8 +87,45 @@ def load_disease_enrichment_analysis(file_path):
 
 
 
+def load_validation_data_frame(file_path):
+
+    column_id_to_name = {}
+    algorithm_validation = {}
+    with open(file_path,"rb") as fp:
+        tsv_reader = csv.reader(fp, delimiter=",")
+        for id, row in enumerate(tsv_reader):
+
+            if id == 0:
+                for index, item in enumerate(row):
+                    column_id_to_name[index] = item.split("-")[0]
+            else:
+                k = int(row[0])
+                for i in range(len(row)):
+
+                    if i == 0:
+                        continue
+
+                    try:
+                        algorithm_validation[column_id_to_name[i]][k] = float(row[i])
+                    except KeyError:
+                        algorithm_validation[column_id_to_name[i]] = {k:float(row[i])}
+
+
+
+
+    return algorithm_validation
+
+
+
+
+
+
+
+
+
+
 ###############################################  Gene Expression  ###########################################
-def load_gene_expression_z_score(file_path):
+def load_gene_expression_z_score(file_path,gene_to_ensembl = None):
 
     patient_list = []
     z_score_dict = {}
@@ -102,7 +140,13 @@ def load_gene_expression_z_score(file_path):
                 gene_name = ""
                 for index_col, item in enumerate(row):
                     if index_col == 0:
-                        gene_name = item
+                        if gene_to_ensembl is None:
+                            gene_name = item
+                        else:
+                            try:
+                                gene_name = gene_to_ensembl[item]
+                            except KeyError:
+                                pass
                     else:
                         try:
                             z_score_dict[gene_name].append(float(item))
@@ -165,14 +209,50 @@ def load_co_expression_network(file_path):
 
     return gene_to_gene_ge_weight
 
+def load_independent_t_test(file_path):
 
+    independent_t_test_dict = {}
+    ranking_by_gene_name = {}
 
+    with open(file_path,'rb') as file:
+        csv_reader = csv.reader(file,delimiter=',')
+        for index,row in enumerate(csv_reader):
 
+            if index == 0:
+                continue
 
+            gene_name = row[0]
+            p_value = float(row[1])
+            mean = float(row[2])
 
+            independent_t_test_dict[gene_name] = p_value
 
+    sorted_independent_t_test = sorted(independent_t_test_dict.items(), key=operator.itemgetter(1))
 
+    for index, record in enumerate(sorted_independent_t_test):
+        gene_name = record[0]
 
+        ranking_by_gene_name[gene_name] = index + 1
+
+    return independent_t_test_dict,ranking_by_gene_name
 
 
 ############################################### End  Gene Expression  ##################################################
+
+
+def load_gene_ensembl_id_from_disk( delimiter=','):
+
+    file_path = NETWORK_MEDICINE_PATH + "db/ensembl_mapping/ensembl_ppi_barabasi_data_set.txt"
+    gene_to_ensembl_id = {}
+    ensembl_id_to_gene = {}
+    with open(file_path, 'rb') as fp:
+        csv_reader = csv.reader(fp, delimiter=delimiter)
+
+        for row in csv_reader:
+            gene_name = row[0]
+            ensembl_id = row[1]
+
+            gene_to_ensembl_id[gene_name] = ensembl_id
+            ensembl_id_to_gene[ensembl_id] = gene_name
+
+    return gene_to_ensembl_id,ensembl_id_to_gene

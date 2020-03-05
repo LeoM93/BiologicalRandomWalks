@@ -1,12 +1,12 @@
 import networkx as nx
 
 from sklearn.preprocessing import normalize
+from file_manager.file_loader import load_gene_ensembl_id_from_disk
 class PPINetwork():
 
     def __init__(self,ppi_name,adjacency_matrix,nx_graph = None):
         self.ppi_name = ppi_name
         self.adjacency_matrix = adjacency_matrix
-
 
         if nx_graph is not None:
             self.ppi_network = nx_graph
@@ -20,7 +20,6 @@ class PPINetwork():
             for neighbor in neighbors:
                 if node != neighbor:
                     self.ppi_network.add_edge(node, neighbor, weight=1.0)
-
 
 
     def get_normalized_adjacency_matrix(self):

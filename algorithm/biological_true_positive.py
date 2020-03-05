@@ -144,6 +144,9 @@ class BiologicalTruePositive(Algorithm):
 
         if self.gene_expression_aggregation_function == "sum":
             return [gene_name, biological_score[1] + gene_expression_score[1]]
+        else:
+            return [gene_name, biological_score[1]]
+
 
 
 

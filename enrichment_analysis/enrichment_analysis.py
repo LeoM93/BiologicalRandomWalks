@@ -26,6 +26,7 @@ class EnrichmentAnalysis():
         for gene in seed_set:
 
             term_descriptions = self.db_manager.find_gene_ontology(gene)
+
             if term_descriptions != -1:
                 for term_description in term_descriptions:
                     try:

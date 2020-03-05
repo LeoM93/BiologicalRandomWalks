@@ -194,10 +194,6 @@ class BiologicalRandomWalk(Algorithm):
             intersection = len(intersection.intersection(self.enriched_walking_set))
             union = len(union)
 
-        elif self.algorithm_params['walking_parameters']['edge_relevance'] == 2:
-
-            intersection = len(intersection.intersection(self.enriched_walking_set))
-            union = len(union.intersection(self.enriched_walking_set))
 
         elif self.algorithm_params['walking_parameters']['edge_relevance'] == 3:
             intersection = len(intersection.intersection(self.enriched_walking_set))
@@ -368,6 +364,47 @@ class BiologicalRandomWalk(Algorithm):
         elif self.relevance_function == 'product':
             return (1+self._get_node_relevance(gene,'inclusion'))*(1+self._get_node_relevance(gene,'intersection'))/4
 
+        elif relevance_function == 'intersection_normalized_by_degree':
+
+            node_degree = len(self.G.get_neighbors(gene))
+
+            if gene in self.source_node_list:
+                return 1/node_degree
+
+            else:
+                gene_terms = self.teleporting_term_manager.find_gene_ontology(gene)
+                if gene_terms == -1:
+                    return 0
+                else:
+                    return (len(self.enriched_set.intersection(gene_terms))/len(self.enriched_set))/node_degree
+
+
+        elif relevance_function == 'weighted_intersection':
+            gene_terms = self.teleporting_term_manager.find_gene_ontology(gene)
+
+            if gene_terms == -1:
+                return 0
+            else:
+                term_intersection = self.enriched_set.intersection(gene_terms)
+                intersection = 0
+                for term in term_intersection:
+
+                    genes_involved_in_terms = set(self.teleporting_term_manager.get_gene_symbols_by_ontology_id(term))
+                    seed_set = set(self.source_node_list)
+                    gene_intersection = genes_involved_in_terms.intersection(seed_set)
+                    intersection += len(gene_intersection)
+
+                return intersection
+
+        elif relevance_function == 'fair_intersection':
+            gene_terms = self.teleporting_term_manager.find_gene_ontology(gene)
+
+            if gene_terms == -1:
+                return 0
+            else:
+                return len(self.enriched_set.intersection(gene_terms))
+
+
         else:
             print("NO NODE RELEVANCE FUNCTION FOUND")
             exit(10)
@@ -375,7 +412,6 @@ class BiologicalRandomWalk(Algorithm):
 
 
     def _get_node_score(self,relevance):
-
 
         if self.score_function['name'] == 'default':
             return  relevance
