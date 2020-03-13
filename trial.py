@@ -5,30 +5,24 @@ from experiment_pipeline.network_algorithm_framework import NetworkAlgorithmFram
 from experiment_pipeline.validation_framework import ValidationFramework
 from utils.stats import Stats
 
-def run_all(experiment_id= None,_run=False, _validate = False, _stats = True):
+def run_all(experiment_id= None,_run=False, _validate = True, _stats = False):
 
     run = _run
     validate = _validate
     stats = _stats
 
     if experiment_id is None:
-        experiment_name = "brw_journal_breast_cancer_gene_expression_internal_validation_over_all_diseases_omim_barabasi"
+        experiment_name = "brw_journal_breast_cancer_gene_expression_gwas_lcc_as_seed_breast"
     else:
         experiment_name = experiment_id
 
-    disease_ids = []
-    for i in range(1,71):
-
-        if i == 18:
-            continue
-
-        disease_ids.append(i)
+    disease_ids = [1]
 
 
     environment_params = {
 
         'experiment_id': experiment_name,
-        'disease_dataset_name':"barabasi_omim",
+        'disease_dataset_name':"gwas",
 
 
         'disease_ids':disease_ids,
@@ -41,8 +35,8 @@ def run_all(experiment_id= None,_run=False, _validate = False, _stats = True):
         'gene_expression_db': 'TGCA_2014',
 
 
-        'num_of_fold':100,
-        'train_percentuage': 0.7,  # [0,1]
+        'num_of_fold':1,
+        'train_percentuage': 1,  # [0,1]
 
 
 
@@ -63,7 +57,6 @@ def run_all(experiment_id= None,_run=False, _validate = False, _stats = True):
     diseases, ppi_network, db_managers, gene_expression_manager, gwas_collection_manager = experiment_initialization.initialize_experiment_variable()
 
 
-
     if run:
 
         naf = NetworkAlgorithmFramework(environment_params,enriched_analysis_params,diseases,ppi_network,db_managers,gene_expression_manager)
@@ -78,8 +71,8 @@ def run_all(experiment_id= None,_run=False, _validate = False, _stats = True):
                 'disease_module_sizes': [10,20,40,50,60,70,80,90,100,150,200]
             }
 
-        #val_f = ValidationFramework(diseases,environment_params,metrics_params)
-        #val_f.validate_all(name="exploratory_analysis")
+        val_f = ValidationFramework(diseases,environment_params,metrics_params)
+        val_f.validate_all(name="exploratory_analysis")
 
         metrics_params = {
             'validation_type': 'train_test_validation',
@@ -87,8 +80,8 @@ def run_all(experiment_id= None,_run=False, _validate = False, _stats = True):
             'disease_module_sizes': [10, 20, 40, 50, 60, 70, 80, 90, 100, 150, 200]
         }
 
-        #val_f = ValidationFramework(diseases, environment_params, metrics_params)
-        #val_f.validate_all(name="exploratory_analysis")
+        val_f = ValidationFramework(diseases, environment_params, metrics_params)
+        val_f.validate_all(name="exploratory_analysis")
 
 
         metrics_params = {

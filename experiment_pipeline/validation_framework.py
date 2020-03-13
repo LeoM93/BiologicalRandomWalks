@@ -88,7 +88,6 @@ class ValidationFramework():
             test_directory_path = self.current_disease_path + "test/"
 
             self.racall_by_trial_id_file_path = self.validation_path
-            recall_by_trial_table = []
 
             train_files = os.listdir(train_directory_path)
 
@@ -136,7 +135,6 @@ class ValidationFramework():
 
                     try:
                         recall_at_k = self._compute_metrics(file_path, train_set, self.current_disease_path,algorithm_file_id)
-                        recall_by_trial_table.append(recall_at_k)
                         result = result + recall_at_k
                         element_to_count += 1
                     except Exception as e:
@@ -146,7 +144,6 @@ class ValidationFramework():
                 print(result)
                 results[file_name] = result
 
-            write_data_on_disk(self.validation_path + self.metrics_params['metrics']+".csv" ,recall_by_trial_table,headers=None)
             pd.DataFrame(results, index = self.metrics_params['disease_module_sizes']).to_csv(self.validation_path +name+"_"+ self.metrics_params['metrics'] + ".csv",index_label ='k')
 
 

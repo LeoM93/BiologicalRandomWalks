@@ -5,6 +5,7 @@ from file_manager.file_loader import load_gene_expression_z_score,filter_co_expr
 
 import math
 from scipy.stats import pearsonr
+import numpy as np
 import scipy
 
 import os
@@ -24,7 +25,7 @@ class GEManager():
         self.differential_expression_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/" + self.db_table + "_differential_expression_independent_t_test.csv"
 
         self.co_expression_by_z_score_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/" + self.db_table + "_co_expression_network_pearson_correlation_by_z_score.csv"
-
+        self.sub_sample_co_expression_by_z_score_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/" + self.db_table + "_" + ppi_name + "_sub_sampled_co_expression_network_pearson_correlation_by_z_score.csv"
         self.pearson_correlation_threshold = pearson_correlation_threshold
 
     def print_schema(self):
@@ -67,6 +68,7 @@ class GEManager():
         if os.path.exists(self.co_expression_by_z_score_file_path):
 
             output_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name +"_" + self.db_table + "_threshold_" + str(self.pearson_correlation_threshold) +".csv"
+
             if os.path.exists(output_file_path):
                 pass
             else:
@@ -109,10 +111,21 @@ class GEManager():
 
 
 
+    def generate_sub_sampled_total_co_expression_network(self,ppi_network):
+        pass
+
+
+
+
     def load_weighted_gene_expression_adjacency_matrix(self, threshold):
 
-        file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name + "_" + self.db_table + "_threshold_" + str(
-            threshold) + ".csv"
+        if threshold != -1:
+            file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name + "_" + self.db_table + "_threshold_" + str(
+                threshold) + ".csv"
+
+        else:
+            file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name + "_" + self.db_table + "_down_sampled.csv"
+
 
         if os.path.exists(file_path):
             return load_co_expression_network(file_path)

@@ -216,10 +216,15 @@ class BiologicalRandomWalk(Algorithm):
         if self.algorithm_params['walking_parameters']['edge_score'] == 'sum':
 
             return 1 + edge_relevance_score
+
+        elif self.algorithm_params['walking_parameters']['edge_score'] == 'None':
+
+            return 1
+
         else:
 
             print()
-            print(" Edge Score: " + self.algorithm_params['walking_parameters']['edge_scpore'] +
+            print(" Edge Score: " + self.algorithm_params['walking_parameters']['edge_score'] +
                   " is not a admissible option")
             exit(3)
 
@@ -265,7 +270,37 @@ class BiologicalRandomWalk(Algorithm):
     def _compute_gene_expression_graph_weight(self):
 
         gene_to_gene_ge_weight = self.gene_expression_manager.load_weighted_gene_expression_adjacency_matrix(self.gene_expression_biological_walking_threshold_co_expression_network)
+
+        '''
+            gene_to_gene_weight = {}
+    
+            for gene in self.G.ppi_network:
+    
+                gene_to_gene_weight[gene] = {}
+                neighbors = self.G.get_neighbors(gene)
+    
+                total_weight = 0.0
+    
+                for neighbor in neighbors:
+    
+                    if neighbor in gene_to_gene_ge_weight[gene]:
+                        gene_to_gene_weight[gene][neighbor] = gene_to_gene_ge_weight[gene][neighbor]
+                        total_weight += total_weight
+    
+                for neighbor in neighbors:
+                    if neighbor not in gene_to_gene_ge_weight[gene]:
+                        gene_to_gene_weight[gene][neighbor] = total_weight / len(neighbors)
+    
+    
+                total_weight = sum(gene_to_gene_weight[gene].values())
+    
+                for neighbor in neighbors:
+                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor] / total_weight
+    
+            return gene_to_gene_weight
+        '''
         return gene_to_gene_ge_weight
+
 
 
     def _compute_graph_weight(self):
@@ -364,6 +399,8 @@ class BiologicalRandomWalk(Algorithm):
         elif self.relevance_function == 'product':
             return (1+self._get_node_relevance(gene,'inclusion'))*(1+self._get_node_relevance(gene,'intersection'))/4
 
+
+
         elif relevance_function == 'intersection_normalized_by_degree':
 
             node_degree = len(self.G.get_neighbors(gene))
@@ -404,6 +441,12 @@ class BiologicalRandomWalk(Algorithm):
             else:
                 return len(self.enriched_set.intersection(gene_terms))
 
+        elif relevance_function == 'None':
+
+            if gene in self.source_node_list:
+                return 1
+            else:
+                return 0
 
         else:
             print("NO NODE RELEVANCE FUNCTION FOUND")
@@ -414,7 +457,7 @@ class BiologicalRandomWalk(Algorithm):
     def _get_node_score(self,relevance):
 
         if self.score_function['name'] == 'default':
-            return  relevance
+            return relevance
 
         elif self.score_function['name'] == 'power':
             return relevance**self.score_function['parameters']['power']
