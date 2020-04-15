@@ -26,11 +26,14 @@ class DrugBankManager(TermManager):
         drug_target_interactions_sql = self.drug_bank_db_manager.comupute_query(query_drug_selection,None)
         self.gene_to_term = {}
         self.term_to_gene = {}
-
+        self.drug_id_to_drug_name ={}
         for  record in drug_target_interactions_sql:
 
             drug_id = record[0]
+            drug_name = record[1]
             gene_name = record[2]
+
+            self.drug_id_to_drug_name[drug_id] = drug_name
 
             if gene_name in gene_list:
 

@@ -5,24 +5,24 @@ from experiment_pipeline.network_algorithm_framework import NetworkAlgorithmFram
 from experiment_pipeline.validation_framework import ValidationFramework
 from utils.stats import Stats
 
-def run_all(experiment_id= None,_run=False, _validate = True, _stats = False):
+def run_all(experiment_id= None,_run=False, _validate = False, _stats = False):
 
     run = _run
     validate = _validate
     stats = _stats
 
     if experiment_id is None:
-        experiment_name = "brw_journal_breast_cancer_gene_expression_gwas_lcc_as_seed_breast"
+        experiment_name = "brw_journal_breast_cancer_gene_expression_omim_as_seed_breast"
     else:
         experiment_name = experiment_id
 
-    disease_ids = [1]
+    disease_ids = [18]
 
 
     environment_params = {
 
         'experiment_id': experiment_name,
-        'disease_dataset_name':"gwas",
+        'disease_dataset_name':"barabasi_omim",
 
 
         'disease_ids':disease_ids,
@@ -35,8 +35,8 @@ def run_all(experiment_id= None,_run=False, _validate = True, _stats = False):
         'gene_expression_db': 'TGCA_2014',
 
 
-        'num_of_fold':1,
-        'train_percentuage': 1,  # [0,1]
+        'num_of_fold':100,
+        'train_percentuage': 0.7,  # [0,1]
 
 
 

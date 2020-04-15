@@ -168,44 +168,6 @@ class NetworkAlgorithmFramework():
                 for scoring_function in teleporting_score_function_combination:
                     for walking in walking_combinations:
 
-                        if teleporting['gene_expression_coefficient'] + teleporting['term_manager_coefficient'] != 1.0:
-                            continue
-
-                        if teleporting["name"] == "biological_teleporting" and walking["name"] == "default":
-
-                            teleporting['score_function'] = {
-                                'name': teleporting_score_function_name,
-                                'parameters': scoring_function
-                            }
-
-                            if teleporting['term_manager'] == "go":
-                                teleporting['term_manager'] = self.db_managers["go"]
-
-                            elif teleporting['term_manager'] == "mirna":
-                                teleporting['term_manager'] = self.db_managers["mirna"]
-
-                            elif teleporting['term_manager'] == "kegg":
-                                teleporting['term_manager'] = self.db_managers["kegg"]
-
-                            if teleporting["gene_expression"] == "TCGA":
-                                teleporting["gene_expression"] = self.gene_expression_manager
-
-                            dictionary = {'teleporting_parameters': teleporting, 'fdr_correction': fdr_correction,
-                                          'algorithm': algorithm, 'walking_parameters': {'name': walking["name"]}}
-                            dictionary['walking_parameters']['edge_relevance'] = -1
-
-                            if fdr_correction == 0:
-                                dictionary['fdr_correction'] = "false"
-                            else:
-                                dictionary['fdr_correction'] = "true"
-
-
-
-                            dictionary_list.append(dictionary)
-
-
-                        else:
-
                             teleporting['score_function'] = {
                                 'name': teleporting_score_function_name,
                                 'parameters': scoring_function
@@ -247,6 +209,7 @@ class NetworkAlgorithmFramework():
                                 dictionary['fdr_correction'] = "true"
 
                             dictionary_list.append(dictionary)
+
         return dictionary_list
 
     def get_all_combinations_of_brw(self,brw):
@@ -343,58 +306,62 @@ class NetworkAlgorithmFramework():
 
         t_par = self.algorithm_params['teleporting_parameters']
 
-
-
-        term_manager_teleporting_path = "teleporting_term_manager_"+ self.algorithm_params['teleporting_parameters']['term_manager'].name + "/fdr_" + \
-                           self.algorithm_params['fdr_correction'] + "/teleporting_p_val_" + \
-                           str(self.algorithm_params['teleporting_parameters']['p_value_threshold'] * 100)[
-                           :3] + "/rel_" + t_par['node_relevance'] + '/f_' + str(
-            t_par['score_function']['name']) + "/" + \
-                           '/'.join([key + '_' + str(value) if not isinstance(value, str) else value for key, value in
-                                     t_par['score_function']['parameters'].items()]) + "/t_" + str(
-            t_par['clip_t']) +"/teleporting_term_manager_coefficient_" + str(t_par["term_manager_coefficient"])
-
-
-
-
-        gene_expression_teleporting_path = "/teleporting_ge_" + t_par["gene_expression"].name +"/teleporting_ge_normalization_"+t_par["gene_expression_normalization"]+ \
-                                    "/teleporting_ge_f_" + t_par["gene_expression_function"] +"/teleporting_ge_coefficient_"+ str(t_par["gene_expression_coefficient"])+\
-                                                   "/teleporting_aggregation_function_"+ t_par["teleporting_aggregation_function"]+"/r_" + str(
-                    t_par['restart_probability'] * 100)[:3] + "/"
+        if t_par['node_relevance'] == "None":
+            term_manager_teleporting_path = "t_term_manager_" + t_par['node_relevance'].lower()
+        else:
+            term_manager_teleporting_path = "t_term_manager_"+ self.algorithm_params['teleporting_parameters']['term_manager'].name + "/fdr_" + \
+                               self.algorithm_params['fdr_correction'] + "/teleporting_p_val_" + \
+                               str(self.algorithm_params['teleporting_parameters']['p_value_threshold'] * 100)[
+                               :3] + "/rel_" + t_par['node_relevance'] + '/f_' + str(
+                t_par['score_function']['name']) + "/" + \
+                               '/'.join([key + '_' + str(value) if not isinstance(value, str) else value for key, value in
+                                         t_par['score_function']['parameters'].items()]) + "/t_" + str(
+                t_par['clip_t'])
 
 
 
-        try:
+        gene_expression_teleporting_path = "/teleporting_ge_" + t_par[
+            "gene_expression"].name + "/teleporting_ge_normalization_" + t_par["gene_expression_normalization"] + \
+                                           "/teleporting_ge_f_" + t_par[
+                                               "gene_expression_function"] + \
+                                           "/teleporting_aggregation_function_" + t_par[
+                                               "teleporting_aggregation_function"] + "/r_" + str(
+            t_par['restart_probability'] * 100)[:3] + "/"
 
 
+
+
+
+        if  self.algorithm_params['walking_parameters']['edge_score'] == 'None':
+            walking_path = "w_term_manager_" + str(self.algorithm_params['walking_parameters']['edge_score']).lower() + "/"
+
+        else:
             walking_path = "walking_term_manager_" +self.algorithm_params['walking_parameters']['term_manager'].name + "/walking_p_val_" + str(
             self.algorithm_params['walking_parameters']['p_value_threshold'] * 100)[:3] \
                        + "/edge_" + str(self.algorithm_params['walking_parameters']['edge_relevance']) \
                        + "/edge_score_" + str(self.algorithm_params['walking_parameters']['edge_score']) + '/walking_aggregation_function_' + self.algorithm_params['walking_parameters']['walking_aggregation_function'] + "/"
 
-            if  self.algorithm_params['walking_parameters']['walking_aggregation_function'] != "None":
-                walking_path += "pearson_threshold_" + str(self.algorithm_params['walking_parameters']['threshold_pearson_correlation']) + "/"
 
 
-        except KeyError:
-            walking_path = ""
 
-        if self.algorithm_params['teleporting_parameters']['name'] == 'biological_teleporting' and self.algorithm_params['walking_parameters']['name'] == 'default':
+        if  self.algorithm_params['walking_parameters']['walking_aggregation_function'] != "None":
 
-            starting_path = self.experiment_path + str(disease_id) + "/algo_outs/" + "BRW/" + "t_b_w_d/"
+            steep = self.algorithm_params['walking_parameters']['pearson_correlation'][0]
+            tr = self.algorithm_params['walking_parameters']['pearson_correlation'][1]
+            walking_path += "w_aggregation_f_" + self.algorithm_params['walking_parameters']['walking_aggregation_function']+   "/down_sampled_co_expression_network" + "/steep_" +str(steep)+ "/translation_"+ str(tr) + "/"
 
-            output_file_path = starting_path + term_manager_teleporting_path + gene_expression_teleporting_path
 
-        else:
-            starting_path = self.experiment_path + str(disease_id) + "/algo_outs/" + "BRW/" + "t_b_w_b/"
+        starting_path = self.experiment_path + str(disease_id) + "/algo_outs/" + "BRW/"
 
-            output_file_path = starting_path + term_manager_teleporting_path +  gene_expression_teleporting_path + walking_path
+        output_file_path = starting_path + term_manager_teleporting_path + gene_expression_teleporting_path + walking_path
 
 
 
         if not os.path.exists(output_file_path):
             os.makedirs(output_file_path)
         return output_file_path
+
+
 
     def _set_up_DIAMOnD(self, disease_id):
         output_file_path = self.experiment_path + str(disease_id) + "/algo_outs/" + "DIAMOnD/"

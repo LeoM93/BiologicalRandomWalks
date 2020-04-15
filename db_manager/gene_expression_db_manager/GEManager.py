@@ -33,10 +33,7 @@ class GEManager():
 
 
     def init_db(self,node_list):
-
         self.load_z_score()
-        self.load_differential_expression_statistics()
-        self.write_co_expression_network(node_list)
 
 
     def close_connection(self):
@@ -53,79 +50,20 @@ class GEManager():
             self.patients, self.z_score = load_gene_expression_z_score(self.z_score_file_path)
 
 
-    def load_differential_expression_statistics(self):
-
-        if os.path.exists(self.differential_expression_file_path):
-            self.independent_t_test,self.rank_by_t_test = load_independent_t_test(self.differential_expression_file_path)
-        else:
-            self._generate_independent_t_test()
 
 
 
 
-    def write_co_expression_network(self,node_list):
-
-        if os.path.exists(self.co_expression_by_z_score_file_path):
-
-            output_file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name +"_" + self.db_table + "_threshold_" + str(self.pearson_correlation_threshold) +".csv"
-
-            if os.path.exists(output_file_path):
-                pass
-            else:
-                filtered_co_expression_adjacency_matrix = filter_co_expression_network(self.co_expression_by_z_score_file_path,node_list,self.pearson_correlation_threshold)
-                write_data_on_disk(output_file_path,rows=filtered_co_expression_adjacency_matrix, headers=["Gene_1","Gene_2","correlation"],write_mode="wb")
-
-        else:
-            self._generate_total_co_expression_network()
-
-
-
-    def _generate_total_co_expression_network(self):
-
-
-        keys = set()
-
-        for index, gene_1 in enumerate(self.z_score):
-            print(index)
-            for gene_2 in self.z_score:
-                if gene_1 != gene_2:
-                    key = (gene_1, gene_2)
-
-                    sorted_key = sorted(key)
-                    tuple_sorted_key = (sorted_key[0],sorted_key[1])
-
-                    if tuple_sorted_key in keys:
-                        continue
-
-                    keys.add(tuple_sorted_key)
-                    pearson = pearsonr(self.z_score[tuple_sorted_key[0]], self.z_score[tuple_sorted_key[1]])
-
-                    if math.isnan(pearson[0]):
-                        pass
-
-                    else:
-                        record = [tuple_sorted_key[0],tuple_sorted_key[1], pearson[0],pearson[1]]
-                        write_row_on_disk(self.co_expression_by_z_score_file_path,
-                                           row=record, write_mode="ab")
 
 
 
 
-    def generate_sub_sampled_total_co_expression_network(self,ppi_network):
-        pass
 
 
+    def load_weighted_gene_expression_adjacency_matrix(self):
 
 
-    def load_weighted_gene_expression_adjacency_matrix(self, threshold):
-
-        if threshold != -1:
-            file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name + "_" + self.db_table + "_threshold_" + str(
-                threshold) + ".csv"
-
-        else:
-            file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name + "_" + self.db_table + "_down_sampled.csv"
-
+        file_path = NETWORK_MEDICINE_PATH + "db/gene_expression/co_expression_network_" + self.ppi_name + "_" + self.db_table + "_down_sampled.csv"
 
         if os.path.exists(file_path):
             return load_co_expression_network(file_path)
@@ -143,9 +81,6 @@ class GEManager():
         else:
             return -1
 
-    def find_gene_ranking_by_independent_t_test(self):
-
-        return -1
 
 
     def _generate_z_score(self):
@@ -249,83 +184,3 @@ class GEManager():
             z_score_table.append(record)
 
         write_data_on_disk(self.z_score_file_path,headers=patient_ids,rows=z_score_table)
-
-
-    def _generate_independent_t_test(self):
-
-        if self.db_table != 'TGCA_2014':
-            print()
-            print("IT IS POSSIBLE TO USE THIS OPTION ONLY WITH " + self.db_table + " TABLE")
-            exit(12)
-
-        gene_expression_query_selection = "SELECT * FROM " + self.db_table
-        tcga_table = self.ge_db_manager.comupute_query(gene_expression_query_selection, record=None)
-
-        gene_expression_by_tumor_patients = {}
-        gene_expression_by_sane_patients = {}
-
-        for item in tcga_table:
-
-            gene_name = item[0]
-            gene_expression = item[1]
-            cell_type = item[2]
-            patient_id = item[3]
-
-            if cell_type == "TUMOR":
-                try:
-                    gene_expression_by_tumor_patients[patient_id][gene_name] = gene_expression
-                except KeyError:
-                    gene_expression_by_tumor_patients[patient_id] = {gene_name: gene_expression}
-            else:
-                try:
-                    gene_expression_by_sane_patients[patient_id][gene_name] = gene_expression
-                except KeyError:
-                    gene_expression_by_sane_patients[patient_id] = {gene_name: gene_expression}
-
-        mean_by_sane_gene_name = {}
-        mean_by_tumor_gene_name = {}
-
-        healthy_group_gene_expression_by_gene_name = {}
-        tumor_group_gene_expression_by_gene_name = {}
-
-        x_i = {}
-
-        num_sane_patients = len(gene_expression_by_sane_patients.keys())
-        num_tumor_patients = len(gene_expression_by_tumor_patients)
-
-        for patient, gene_expression in gene_expression_by_sane_patients.items():
-
-            for gene, value in gene_expression.items():
-                try:
-
-                    mean_by_sane_gene_name[gene] += value
-                    healthy_group_gene_expression_by_gene_name[gene].append(value)
-
-                except KeyError:
-
-                    healthy_group_gene_expression_by_gene_name[gene] = [value]
-                    mean_by_sane_gene_name[gene] = value
-
-
-        for patient, gene_expression in gene_expression_by_tumor_patients.items():
-
-            for gene, value in gene_expression.items():
-                try:
-                    mean_by_tumor_gene_name[gene] += value
-                    tumor_group_gene_expression_by_gene_name[gene].append(value)
-                except KeyError:
-                    tumor_group_gene_expression_by_gene_name[gene] = [value]
-                    mean_by_tumor_gene_name[gene] = value
-
-
-        for gene in mean_by_tumor_gene_name.keys():
-            mean_by_tumor_gene_name[gene] = mean_by_tumor_gene_name[gene]/num_tumor_patients
-
-        gene_table = []
-        for gene, value in tumor_group_gene_expression_by_gene_name.items():
-            p_value = scipy.stats.ttest_ind(healthy_group_gene_expression_by_gene_name[gene], tumor_group_gene_expression_by_gene_name[gene], axis=0, equal_var=False)[1]
-            gene_table.append([gene, p_value, mean_by_tumor_gene_name[gene]])
-
-        write_data_on_disk(self.differential_expression_file_path,headers=["Gene","P-Value","Mean"],rows=gene_table)
-        
-

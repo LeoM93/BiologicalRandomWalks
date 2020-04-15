@@ -197,6 +197,11 @@ def load_co_expression_network(file_path):
             gene_2 = row[1]
             pearson_correlation = float(row[2])
 
+
+
+            if row[2] == "nan":
+                pearson_correlation = 0.0
+
             try:
                 gene_to_gene_ge_weight[gene_1][gene_2] = pearson_correlation
             except KeyError:

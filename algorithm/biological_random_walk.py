@@ -18,63 +18,36 @@ class BiologicalRandomWalk(Algorithm):
     def _init_biological_random_walk(self):
 
 
-        if self.algorithm_params['teleporting_parameters']["name"] == "biological_teleporting" and self.algorithm_params['walking_parameters']["name"] == "default":
+        # term manager field
 
-            # term manager field
-            self.teleporting_p_value = self.algorithm_params["teleporting_parameters"]['p_value']
-            self.restart_probability = self.algorithm_params['teleporting_parameters']['restart_probability']
-            self.t = self.algorithm_params['teleporting_parameters']['clip_t']
-            self.relevance_function = self.algorithm_params['teleporting_parameters']['node_relevance']
-            self.score_function = self.algorithm_params['teleporting_parameters']['score_function']
-            self.teleporting_p_value_threshold = self.algorithm_params['teleporting_parameters']['p_value_threshold']
-            self.fdr_correction = self.algorithm_params['fdr_correction']
-            self.teleporting_term_manager = self.algorithm_params["teleporting_parameters"]['term_manager']
-            self.teleporting_term_manager_coefficient = self.algorithm_params["teleporting_parameters"][
-                'term_manager_coefficient']
-
-            # gene expression field
-            self.gene_expression_manager = self.algorithm_params["teleporting_parameters"]["gene_expression"]
-            self.gene_expression_normalization = self.algorithm_params["teleporting_parameters"][
-                "gene_expression_normalization"]
-            self.gene_expression_function = self.algorithm_params["teleporting_parameters"]["gene_expression_function"]
-            self.gene_expression_coefficient = self.algorithm_params["teleporting_parameters"][
-                "gene_expression_coefficient"]
-            self.teleporting_aggregation_function = self.algorithm_params["teleporting_parameters"][
-                "teleporting_aggregation_function"]
+        self.teleporting_p_value = self.algorithm_params["teleporting_parameters"]['p_value']
+        self.restart_probability = self.algorithm_params['teleporting_parameters']['restart_probability']
+        self.t = self.algorithm_params['teleporting_parameters']['clip_t']
+        self.relevance_function = self.algorithm_params['teleporting_parameters']['node_relevance']
+        self.score_function = self.algorithm_params['teleporting_parameters']['score_function']
+        self.teleporting_p_value_threshold = self.algorithm_params['teleporting_parameters']['p_value_threshold']
+        self.fdr_correction = self.algorithm_params['fdr_correction']
+        self.teleporting_term_manager = self.algorithm_params["teleporting_parameters"]['term_manager']
 
 
-        elif self.algorithm_params['teleporting_parameters']["name"] == "biological_teleporting" and self.algorithm_params['walking_parameters']["name"] == "biological_walking":
-
-            # term manager field
-            self.teleporting_p_value = self.algorithm_params["teleporting_parameters"]['p_value']
-            self.restart_probability = self.algorithm_params['teleporting_parameters']['restart_probability']
-            self.t = self.algorithm_params['teleporting_parameters']['clip_t']
-            self.relevance_function = self.algorithm_params['teleporting_parameters']['node_relevance']
-            self.score_function = self.algorithm_params['teleporting_parameters']['score_function']
-            self.teleporting_p_value_threshold = self.algorithm_params['teleporting_parameters']['p_value_threshold']
-            self.fdr_correction = self.algorithm_params['fdr_correction']
-            self.teleporting_term_manager = self.algorithm_params["teleporting_parameters"]['term_manager']
-            self.teleporting_term_manager_coefficient = self.algorithm_params["teleporting_parameters"]['term_manager_coefficient']
-
-
-            # gene expression field
-            self.gene_expression_manager = self.algorithm_params["teleporting_parameters"]["gene_expression"]
-            self.gene_expression_normalization = self.algorithm_params["teleporting_parameters"]["gene_expression_normalization"]
-            self.gene_expression_function = self.algorithm_params["teleporting_parameters"]["gene_expression_function"]
-            self.gene_expression_coefficient = self.algorithm_params["teleporting_parameters"]["gene_expression_coefficient"]
-            self.teleporting_aggregation_function = self.algorithm_params["teleporting_parameters"]["teleporting_aggregation_function"]
+        # gene expression field
+        self.gene_expression_manager = self.algorithm_params["teleporting_parameters"]["gene_expression"]
+        self.gene_expression_normalization = self.algorithm_params["teleporting_parameters"]["gene_expression_normalization"]
+        self.gene_expression_function = self.algorithm_params["teleporting_parameters"]["gene_expression_function"]
+        self.teleporting_aggregation_function = self.algorithm_params["teleporting_parameters"]["teleporting_aggregation_function"]
 
 
 
 
-            self.walking_p_value = self.algorithm_params["walking_parameters"]['p_value']
-            self.walking_term_managet = self.algorithm_params["walking_parameters"]['term_manager']
-            self.walking_p_value_threshold = self.algorithm_params['walking_parameters']['p_value_threshold']
+        self.walking_p_value = self.algorithm_params["walking_parameters"]['p_value']
+        self.walking_term_managet = self.algorithm_params["walking_parameters"]['term_manager']
+        self.walking_p_value_threshold = self.algorithm_params['walking_parameters']['p_value_threshold']
 
 
-
-            self.gene_expression_biological_walking_aggregation = self.algorithm_params['walking_parameters']['walking_aggregation_function']
-            self.gene_expression_biological_walking_threshold_co_expression_network = self.algorithm_params['walking_parameters']['threshold_pearson_correlation']
+        self.gene_expression_biological_walking_aggregation = self.algorithm_params['walking_parameters']['walking_aggregation_function']
+        self.gene_expression_pearson_correlation = self.algorithm_params['walking_parameters']['pearson_correlation']
+        self.gene_expression_steep = self.algorithm_params['walking_parameters']['pearson_correlation'][0]
+        self.gene_expression_translation = self.algorithm_params['walking_parameters']['pearson_correlation'][1]
 
 
     def _compute_p_value(self,p_value,p_value_threshold):
@@ -105,12 +78,7 @@ class BiologicalRandomWalk(Algorithm):
 
 
     def _initialize_page_rank(self):
-
-        if self.algorithm_params['teleporting_parameters']['name'] == 'default':
-            return self._default()
-
-        else:
-            return self._get_aggregated_initial_page_rank()
+        return self._get_aggregated_initial_page_rank()
 
 
     def _get_aggregated_initial_page_rank(self):
@@ -128,14 +96,10 @@ class BiologicalRandomWalk(Algorithm):
 
         if self.teleporting_aggregation_function == "sum":
 
-            aggregated_teleporting = {k: self.teleporting_term_manager_coefficient * pr_1[k] +
-                                         self.gene_expression_coefficient * pr_2[k]
-                                      for k in pr_1.keys()}
+            aggregated_teleporting = {k:  pr_1[k]+pr_2[k] for k in pr_1.keys()}
 
         elif self.teleporting_aggregation_function == "product":
-            aggregated_teleporting = {k: self.teleporting_term_manager_coefficient * pr_1[k] *
-                                         self.gene_expression_coefficient * pr_2[k]
-                                      for k in pr_1.keys()}
+            aggregated_teleporting = {k:  pr_1[k] * pr_2[k] for k in pr_1.keys()}
 
 
         total = sum(aggregated_teleporting.values())
@@ -163,39 +127,11 @@ class BiologicalRandomWalk(Algorithm):
 
 
 
-    def _compute_default_graph_weight(self):
-        gene_to_gene_weight = {}
-
-        for gene in self.G.ppi_network:
-            gene_to_gene_weight[gene] = {}
-            neighbors = self.G.get_neighbors(gene)
-
-            total_weight = 0
-
-            for neighbor in neighbors:
-
-                if self.algorithm_params['walking_parameters']['edge_relevance'] == -1:
-                    gene_to_gene_weight[gene][neighbor] = 1
-                    total_weight += 1
-
-            for neighbor in neighbors:
-                gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]/total_weight
-
-        return gene_to_gene_weight
-
 
     def _compute_edge_relevance(self,intersection,union):
 
+
         if self.algorithm_params['walking_parameters']['edge_relevance'] == 0:
-            intersection = len(intersection)
-            union = len(union)
-
-        elif self.algorithm_params['walking_parameters']['edge_relevance'] == 1:
-            intersection = len(intersection.intersection(self.enriched_walking_set))
-            union = len(union)
-
-
-        elif self.algorithm_params['walking_parameters']['edge_relevance'] == 3:
             intersection = len(intersection.intersection(self.enriched_walking_set))
             union = 1
 
@@ -269,46 +205,50 @@ class BiologicalRandomWalk(Algorithm):
 
     def _compute_gene_expression_graph_weight(self):
 
-        gene_to_gene_ge_weight = self.gene_expression_manager.load_weighted_gene_expression_adjacency_matrix(self.gene_expression_biological_walking_threshold_co_expression_network)
+        gene_to_gene_ge_weight = self.gene_expression_manager.load_weighted_gene_expression_adjacency_matrix()
 
-        '''
-            gene_to_gene_weight = {}
+        gene_to_gene_weight = {}
+        for gene in self.G.ppi_network:
     
-            for gene in self.G.ppi_network:
+            gene_to_gene_weight[gene] = {}
+            neighbors = self.G.get_neighbors(gene)
     
-                gene_to_gene_weight[gene] = {}
-                neighbors = self.G.get_neighbors(gene)
+            total_weight = 0.0
     
-                total_weight = 0.0
+            for neighbor in neighbors:
     
-                for neighbor in neighbors:
-    
+                if gene in gene_to_gene_ge_weight:
                     if neighbor in gene_to_gene_ge_weight[gene]:
-                        gene_to_gene_weight[gene][neighbor] = gene_to_gene_ge_weight[gene][neighbor]
+
+                        gene_to_gene_weight[gene][neighbor] = self._sigmoid(gene_to_gene_ge_weight[gene][neighbor],steep=self.gene_expression_steep,translation=self.gene_expression_translation)
                         total_weight += total_weight
-    
-                for neighbor in neighbors:
+
+
+            '''for neighbor in neighbors:
+                if gene in gene_to_gene_ge_weight:
+
                     if neighbor not in gene_to_gene_ge_weight[gene]:
                         gene_to_gene_weight[gene][neighbor] = total_weight / len(neighbors)
-    
-    
-                total_weight = sum(gene_to_gene_weight[gene].values())
-    
-                for neighbor in neighbors:
-                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor] / total_weight
-    
-            return gene_to_gene_weight
-        '''
-        return gene_to_gene_ge_weight
+                else:
+                    gene_to_gene_weight[gene][neighbor] = total_weight / len(neighbors)
 
+            total_weight = sum(gene_to_gene_weight[gene].values())
+            '''
+
+
+            for neighbor in neighbors:
+                if neighbor in gene_to_gene_weight[gene]:
+                    if total_weight > 0.0:
+                        gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor] / total_weight
+                    else:
+                        gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]
+
+        return gene_to_gene_weight
 
 
     def _compute_graph_weight(self):
 
-        if self.algorithm_params['walking_parameters']['edge_relevance'] == -1 and self.algorithm_params['walking_parameters']['name'] == 'default':
-            self.gene_to_gene_weight = self._compute_default_graph_weight()
-
-        elif self.gene_expression_biological_walking_aggregation is "None":
+        if self.gene_expression_biological_walking_aggregation is "None":
             self.gene_to_gene_weight = self._compute_term_manager_graph_weight()
         else:
             self.gene_to_gene_weight = self.compute_aggregated_graph_weight()
@@ -335,41 +275,58 @@ class BiologicalRandomWalk(Algorithm):
 
             for neighbor in total_neighbors:
 
+
                 if neighbor in neighbors_ppi and neighbor in neighbors_correlation_network:
-                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_term_weight[gene][neighbor] + gene_to_gene_ge_weight[gene][neighbor]
+
+                    gene_to_gene_weight[gene][neighbor] = self._compute_aggregated_graph_weight( gene_to_gene_term_weight[gene][neighbor],gene_to_gene_ge_weight[gene][neighbor])
                     total_weight += gene_to_gene_weight[gene][neighbor]
 
                 elif neighbor in neighbors_ppi:
 
-                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_term_weight[gene][neighbor]
+                    gene_to_gene_weight[gene][neighbor] = self._compute_aggregated_graph_weight(gene_to_gene_term_weight[gene][neighbor], 0.0)
                     total_weight += gene_to_gene_weight[gene][neighbor]
 
                 else:
-                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_ge_weight[gene][neighbor]
+                    gene_to_gene_weight[gene][neighbor] = self._compute_aggregated_graph_weight(0.0, gene_to_gene_ge_weight[gene][neighbor])
                     total_weight += gene_to_gene_weight[gene][neighbor]
 
+
             for neighbor in total_neighbors:
-                gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]/total_weight
+                if total_weight > 0.0:
+                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]/total_weight
+                else:
+                    gene_to_gene_weight[gene][neighbor] = gene_to_gene_weight[gene][neighbor]
 
 
         return gene_to_gene_weight
 
 
-    def _default(self):
-        page_rank_dictionary = {}
-
-
-        for gene in self.G.get_node_list():
-            if gene in self.source_node_list:
-                page_rank_dictionary[gene] = 1/len(self.source_node_list)
-            else:
-                page_rank_dictionary[gene] = 0
-        self.initial_pr = page_rank_dictionary
-        return page_rank_dictionary
-
-
     def _sigmoid(self,x,steep,translation):
-        return 1 / (1 + math.exp(-steep*(x-translation)))
+
+        if steep == "_" and translation == "_":
+            return x
+
+        elif steep == "_" and translation != "_":
+            if x > translation:
+                return x
+            else:
+                return 0
+
+        else:
+            return 1 / (1 + math.exp(-steep*(x-translation)))
+
+
+
+    def _compute_aggregated_graph_weight(self,biological_weight, gene_expression_weight):
+
+        if self.gene_expression_biological_walking_aggregation == "sum":
+
+            return biological_weight + gene_expression_weight
+
+        elif self.gene_expression_biological_walking_aggregation == "product":
+
+            return  biological_weight * gene_expression_weight
+
 
 
 
@@ -469,12 +426,6 @@ class BiologicalRandomWalk(Algorithm):
             return relevance
 
 
-    def _inverse_sigmoid(self,rank):
-        steep = self.score_function['parameters']['steep']
-        translation = self.score_function['parameters']['translation']
-        return 1 - (1/(1+math.exp(-steep*(rank-translation))))
-
-
     def _biological_teleporting(self):
 
         if self.fdr_correction == 'false':
@@ -487,29 +438,16 @@ class BiologicalRandomWalk(Algorithm):
         if len(self.enriched_set) == 0:
             return {}
 
-        if self.score_function['name'] == 'default':
-            page_rank_dictionary = {gene:  min(self.t,self._get_node_relevance(gene,self.relevance_function)) for gene in self.G.get_node_list() }
 
-        elif self.score_function['name'] != 'ranking':
-            page_rank_dictionary = {gene:  min(self.t,self._get_node_score(self._get_node_relevance(gene,self.relevance_function))) for gene in self.G.get_node_list() }
+        page_rank_dictionary = {gene:  min(self.t,self._get_node_score(self._get_node_relevance(gene,self.relevance_function))) for gene in self.G.get_node_list() }
 
 
-        else:
-
-            sorted_pr = sorted([(gene,  min(self.t,self._get_node_relevance(gene,self.relevance_function))) for gene in
-                                self.G.get_node_list()], key=lambda x: x[1], reverse=True)
-
-            if self.score_function['parameters']['function_ranking_score'] == 'inv_sig':
-                page_rank_dictionary = {gene: (self._inverse_sigmoid(rank) if gene not in self.source_node_list else self._inverse_sigmoid(1))  for rank,(gene,score) in enumerate(sorted_pr)}
-            else:
-                print('No FUNCTION FOUND')
-                print(self.score_function['parameters']['function_ranking_score'])
-                exit(1)
 
         total = sum(page_rank_dictionary.values())
         page_rank_dictionary = {k: v / total for k, v in page_rank_dictionary.items()}
 
         return page_rank_dictionary
+
 
 
 
@@ -519,6 +457,7 @@ class BiologicalRandomWalk(Algorithm):
 
         if "log_z_score_base_" in self.gene_expression_normalization:
             return self._get_log_gene_expression_by_gene_name(gene)
+
 
     def _get_log_gene_expression_by_gene_name(self, gene):
 

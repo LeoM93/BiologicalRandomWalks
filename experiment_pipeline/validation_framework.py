@@ -125,6 +125,8 @@ class ValidationFramework():
 
                 element_to_count = 0
 
+
+                print(k)
                 for item in v:
                     file_path = k +"/" + item
 
