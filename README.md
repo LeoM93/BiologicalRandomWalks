@@ -19,8 +19,8 @@ The University of Rome "La Sapienza", Rome, Italy
 
 Like Random Walks with Restart (RWR) and diffusion methods in general, Biological Random Walks assumes knowledge of a seed set of known genes for a disease of interest. Unlike previous ones, BRW consists of two main steps:
 
-- extracting statistically significant features from biological data, using themto compute a personalization vector and a transition matrix used by the algorithm;  - using the stationary distribution of the correspondingrandom walk to rank genes
-
+- extracting statistically significant features from biological data, using themto compute a personalization vector and a transition matrix used by the algorithm
+- using the stationary distribution of the correspondingrandom walk to rank genes
 
 
 ![alt text](https://github.com/LeoM93/BiologicalRandomWalks/blob/master/imgs/BRW_flow.png?raw=true)
