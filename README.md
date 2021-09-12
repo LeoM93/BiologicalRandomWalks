@@ -7,7 +7,7 @@
 
 ### Author: 
 
-Michele Gentili, Leonardo Martini, Luca Becchetti, Lorenzo Farina, Marialuisa Sponziello
+Michele Gentili, Leonardo Martini, Manuela Petti, Luca Becchetti, Lorenzo Farina, Marialuisa Sponziello
 
 Contact:
 Michele Gentili (gentili@diag.uniroma1.it),  Leonardo Martini (martini@diag.uniroma1.it)
