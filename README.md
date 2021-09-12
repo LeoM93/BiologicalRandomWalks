@@ -57,7 +57,7 @@ They are:
  ```
  < node_id_1 > \t < annotation_id > \t < dataset_name >
  ```
- - disease_ontology.tsv: Disease-annotation associantions dataset in tab separated format
+ - disease_ontology.tsv: Statistically significant Disease-annotation associantions dataset in tab separated format
  ```
  < annotation_id > \t < dataset_name >
  ```
