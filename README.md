@@ -48,13 +48,19 @@ They are:
  <node_id_1> \t <node_id_2> 
  ```
  - co_expression_network.tsv: A Weighted Co-Expression network in tab separated format <node_id_1> \t <node_id_2> \t <score>
+ ```
+ <node_id_1> \t <node_id_2> \t <score>
+ ```
  - seed_set.tsv: A list of node ids (each row contains one id)
  - de_genes.tsv: A list of Differentially Expressed (DE) gene (each row contains one id)
  - annotations.tsv: Gene-annotation associantions dataset in tab separated format <node_id_1> \t <annotation_id> \t <dataset_name>
+ ```
+ <node_id_1> \t <annotation_id> \t <dataset_name>
+ ```
  - disease_ontology.tsv: Disease-annotation associantions dataset in tab separated format <annotation_id> \t <dataset_name>
-
-
-
+ ```
+ <annotation_id> \t <dataset_name>
+ ```
 
 ### How to run BRW
 
