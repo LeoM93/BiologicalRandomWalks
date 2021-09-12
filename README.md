@@ -10,11 +10,9 @@
 Michele Gentili, Leonardo Martini, Luca Becchetti, Marialuisa Sponziello
 
 Contact:
-
 Michele Gentili (gentili@diag.uniroma1.it),  Leonardo Martini (martini@diag.uniroma1.it)
 
 Department of Computer Science
-
 The University of Rome "La Sapienza", Rome, Italy
 
 ### Algorithm Description
@@ -30,7 +28,6 @@ Please go the the directory BiologicalRqndomWalks/toy_example to see the inputs 
 The directory BiologicalRqndomWalks/toy_example contains input files as a toy dataset for BRW.
 
 They are:
-
  - Protein-Protein Interaction (PPI) network: ppi_network.tsv
  - Weighted Co-Expression network: co_expression_network.tsv
  - Seed set: seed_set.tsv
