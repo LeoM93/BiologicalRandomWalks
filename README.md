@@ -1,7 +1,7 @@
 ## Biological Random Walks: Integrating Gene Expression for Tissue Specific Prediction
 
 ### Citation 
-[1] M. Gentili, L. Martini, L. Becchetti, M. Sponziello, Biological Random Walks: integrating gene expression in tissue-specific prediction. 
+[1] M. Gentili, L. Martini, L. Becchetti, M. Sponziello, Biological Random Walks: integrating gene expression in tissue-specific prediction. (2021)
 
 [2] M. Gentili, L. Martini, M. Petti, L. Farina, L. Becchetti, Biological Random Walks: integrating gene expression in tissue-specific prediction. IEEE Symposium on Computational Intelligence and Bioinformatics and Computational Biology (CIBCB) (2019)
 
