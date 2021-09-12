@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	parser.add_argument('-a',default = None)
 
 	parser.add_argument('-o',default = None)
-	parser.add_argument('-r',default = 0.9)
+	parser.add_argument('-r',default = 0.75)
 
 
 	args = parser.parse_args()
