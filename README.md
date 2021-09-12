@@ -17,9 +17,9 @@ Department of Computer Science
 
 The University of Rome "La Sapienza", Rome, Italy
 
-### Description
+### Algorithm Description
 
-### Libraries
+### Python Libraries
 
 ### Toy Examples
 
@@ -31,12 +31,12 @@ The directory BiologicalRqndomWalks/toy_example contains input files as a toy da
 
 They are:
 
-- Protein-Protein Interaction (PPI) network: ppi_network.tsv
-- Weighted Co-Expression network: co_expression_network.tsv
-- Seed set: seed_set.tsv
-- Differentially Expressed (DE) gene set: de_genes.tsv
-- Gene-annotation associantions dataset: annotations.tsv
-- Disease-annotation associantions dataset: disease_ontology.tsv
+ - Protein-Protein Interaction (PPI) network: ppi_network.tsv
+ - Weighted Co-Expression network: co_expression_network.tsv
+ - Seed set: seed_set.tsv
+ - Differentially Expressed (DE) gene set: de_genes.tsv
+ - Gene-annotation associantions dataset: annotations.tsv
+ - Disease-annotation associantions dataset: disease_ontology.tsv
 
 
 ### Input files format
