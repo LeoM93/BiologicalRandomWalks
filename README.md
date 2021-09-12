@@ -21,6 +21,8 @@ Like Random Walks with Restart (RWR) and diffusion methods in general, Biologica
 
 - extracting statistically significant features from biological data, using themto compute a personalization vector and a transition matrix used by the algorithm;  - using the stationary distribution of the correspondingrandom walk to rank genes
 
+
+
 ![alt text](https://github.com/LeoM93/BiologicalRandomWalks/blob/master/imgs/BRW_flow.png?raw=true)
 
 
