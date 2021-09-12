@@ -88,7 +88,7 @@ In order to run the algorithm type "python3 main.py" followed by option:
 ### Example
 
  ```
- python3 -p toy_example/ppi_network.tsv -c toy_example/co_expression_network.tsv -s toy_example/seed_set.tsv -de toy_example/de_genes.tsv -a toy_example/ -o toy_example/
+ python3 -p toy_example/ppi_network.tsv -c toy_example/co_expression_network.tsv -s toy_example/seed_set.tsv -de toy_example/de_genes.tsv -a toy_example/annotations.tsv -do toy_example/disease_ontology.tsv -o toy_example/output.tsv
  ```
 
 
