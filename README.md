@@ -28,7 +28,7 @@ Like Random Walks with Restart (RWR) and diffusion methods in general, Biologica
 Biological Random  Walks flow propagation: given the seed nodes (star nodes), the flow propagates to his neighbors. The BRW not only propagatethe  flow  around  them  but  also  teleports  the  flow  to  the  target  of  the  BTP  nodes  (blue  arrows).  So  it  discovers  nodes  that  are  biologically  correlated  to  theseed nodes (just through the BTP, left-lower test node) and those nodes that aren’t reached directly to the BTP but are close to many related nodes.
 
 ### Python Libraries
-Library imported and their version:
+Imported libraries and their version:
 
 - numpy, version 1.19.1
 - networkx, version 2.4
@@ -38,20 +38,20 @@ Library imported and their version:
 
 Please go the the directory BiologicalRqndomWalks/toy_example to see the inputs format of BRW. 
 
-### Input files
+### Input files and formats
 
 The directory BiologicalRqndomWalks/toy_example contains input files as a toy dataset for BRW.
 
 They are:
- - Protein-Protein Interaction (PPI) network: ppi_network.tsv
- - Weighted Co-Expression network: co_expression_network.tsv
- - Seed set: seed_set.tsv
- - Differentially Expressed (DE) gene set: de_genes.tsv
- - Gene-annotation associantions dataset: annotations.tsv
- - Disease-annotation associantions dataset: disease_ontology.tsv
+ - ppi_network.tsv: A Protein-Protein Interaction (PPI) network in tab separated format <node_id_1> \t <node_id_2>
+ - co_expression_network.tsv: A Weighted Co-Expression network in tab separated format <node_id_1> \t <node_id_2> \t <score>
+ - seed_set.tsv: A list of node ids (each row contains one id)
+ - de_genes.tsv: A list of Differentially Expressed (DE) gene (each row contains one id)
+ - annotations.tsv: Gene-annotation associantions dataset in tab separated format <node_id_1> \t <annotation_id> \t <dataset_name>
+ - disease_ontology.tsv: Disease-annotation associantions dataset in tab separated format <annotation_id> \t <dataset_name>
 
 
-### Input files format
+
 
 ### How to run BRW
 
