@@ -43,7 +43,10 @@ Please go the the directory BiologicalRqndomWalks/toy_example to see the inputs 
 The directory BiologicalRqndomWalks/toy_example contains input files as a toy dataset for BRW.
 
 They are:
- - ppi_network.tsv: A Protein-Protein Interaction (PPI) network in tab separated format <node_id_1> \t <node_id_2>
+ - ppi_network.tsv: A Protein-Protein Interaction (PPI) network in tab separated format 
+ '''
+ <node_id_1> \t <node_id_2>
+ '''
  - co_expression_network.tsv: A Weighted Co-Expression network in tab separated format <node_id_1> \t <node_id_2> \t <score>
  - seed_set.tsv: A list of node ids (each row contains one id)
  - de_genes.tsv: A list of Differentially Expressed (DE) gene (each row contains one id)
