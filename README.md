@@ -85,7 +85,7 @@ To install the framework download the zip file and decompress it. Then, Iin orde
  
  -o < output_file_path > (required)
 
-To Run the algorithm described in [1], all the options are required, while if to run the framework described in [2] do not use option -c and option -de
+To Run the algorithm described in [1], all the options are required,to choose the other one described in [2] do not use options -c and -de
 
 ### Example
 
