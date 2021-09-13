@@ -71,7 +71,7 @@ To install the framework download the zip file and decompress it. Then, Iin orde
 
  -p < protein_interaction_network_file_path > (required)
 
- -c < co_expression_network_file_path > (required)
+ -c < co_expression_network_file_path > (optional)
 
  -s < seed_set_file_path > (required) 
 
@@ -84,9 +84,8 @@ To install the framework download the zip file and decompress it. Then, Iin orde
  -r < restart probability > (optional, default: 0.75)
  
  -o < output_file_path > (required)
- 
- -add <new_protein_file previous_HSP_file_name> (optional, if new protein sequences are added and only HSPs in those sequences will be computed. New HSPs will be appended to previous_HSP_file. hsp_output_file_name will be ignored)
 
+To Run the algorithm described in [1], all the options are required, while if to run the framework described in [2] do not use option -c and option -de
 
 ### Example
 
