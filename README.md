@@ -10,10 +10,12 @@
 Michele Gentili, Leonardo Martini, Manuela Petti, Luca Becchetti, Lorenzo Farina, Marialuisa Sponziello
 
 Contact:
+
 Michele Gentili (gentili@diag.uniroma1.it),  Leonardo Martini (martini@diag.uniroma1.it)
 
-Department of Computer Science
-The University of Rome "La Sapienza", Rome, Italy
+Department of Computer, Control, and Management Engineering Antonio Ruberti, Sapienza University of Rome, Rome, Italy
+
+Translational and Precision Medicine Department Sapienza University of Rome, Rome, Italy
 
 ### Algorithm Description
 
