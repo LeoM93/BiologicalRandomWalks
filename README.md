@@ -75,7 +75,7 @@ To install the framework download the zip file and decompress it. Then, Iin orde
 
  -s < seed_set_file_path > (required) 
 
- -de < differentially_expressed_genes_file_path > (optional) 
+ -de < differentially_expressed_genes_file_path > (optional, default: None) 
 
  -do < disease_ontologies_file_path > (required)
  
