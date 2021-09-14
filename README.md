@@ -19,10 +19,11 @@ Translational and Precision Medicine Department Sapienza University of Rome, Rom
 
 ### Algorithm Description
 
-Like Random Walks with Restart (RWR) and diffusion methods in general, Biological Random Walks assumes knowledge of a seed set of known genes for a disease of interest. Unlike previous ones, BRW consists of two main steps:
-
-- extracting statistically significant features from biological data, using themto compute a personalization vector and a transition matrix used by the algorithm
-- using the stationary distribution of the correspondingrandom walk to rank genes
+The  Biological  Random  Walk  heuristic  provides  a  framework  to  integrateheterogeneous  biological  data  sources  within  diffusion-based  prioritizationmethods that are based on the well known Random Walk with restart algo-rithm (RWR). For the sake of exposition, in the remainder we refer to thebiological information associated to a gene i (e.g., the set of its annotations)as  the  set  of  its  labels,  denoted  by  labels(i). BRW ranks genes according to the following steps:
+- We compute the set of statistically significant annotations of known disease gene
+- Rather than using the standard method, we compute individual tele-porting  probabilities  for  all  nodes  of  the  PPI.  In  particular,  the  Biological Teleporting Probability (BTP) of a node increases with thesimilarity between its labels and the enriched set
+- In a similar fashion,  we  weigh  PPI  network  interactions  using  nodeannotations and the enriched set.  This results in a modified randomwalk, namely the Biological Random Walk (BRW), in which flow prop-agation  is  biased  toward  genes  that  are  functionally  closer  to  thoseforming the seed set
+- Finally,  we  rank  genes  according  to  their  Biological  Random  Walk(BRW) score.
 
 
 ![alt text](https://github.com/LeoM93/BiologicalRandomWalks/blob/master/imgs/BRW_flow.png?raw=true)
