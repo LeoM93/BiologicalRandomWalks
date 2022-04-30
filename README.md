@@ -43,7 +43,7 @@ Imported libraries and their version:
 
 ### Computing the Ontology Graph
 
-To compute the ontology graph, run the following scripts:
+To compute the ontology graph, run the following commands:
 
  ```
  cd data_preprocessing
@@ -65,7 +65,7 @@ The ontology graph has the following structre:
 
 ### Computing the Tumor-Control Table TCGA
 
-To compute Tumor and Control Table for each Tumor taken in consideration in the article, run the following scripts:
+To compute Tumor and Control Table for each Tumor taken in consideration in the article, run the following commands:
 
  ```
  cd data_preprocessing
