@@ -1,11 +1,11 @@
-## Biological Random Walks: Integrating Gene Expression for Tissue Specific Prediction
+# Biological Random Walks: Integrating Gene Expression for Tissue Specific Prediction
 
-### Citation 
+## Citation 
 [1] M. Gentili, L. Martini, L. Becchetti, M. Sponziello, Biological Random Walks: integrating gene expression in tissue-specific prediction. (2021)
 
 [2] M. Gentili, L. Martini, M. Petti, L. Farina, L. Becchetti, Biological Random Walks: integrating heterogeneous data in disease gene prioritization. IEEE Symposium on Computational Intelligence and Bioinformatics and Computational Biology (CIBCB) (2019)
 
-### Author: 
+## Author: 
 
 Michele Gentili, Leonardo Martini, Manuela Petti, Luca Becchetti, Lorenzo Farina, Marialuisa Sponziello
 
@@ -17,7 +17,7 @@ Department of Computer, Control, and Management Engineering Antonio Ruberti, Sap
 
 Translational and Precision Medicine Department Sapienza University of Rome, Rome, Italy
 
-### Algorithm Description
+## Algorithm Description
 
 The  Biological  Random  Walk  heuristic  provides  a  framework  to  integrateheterogeneous  biological  data  sources  within  diffusion-based  prioritizationmethods that are based on the well known Random Walk with restart algo-rithm (RWR). For the sake of exposition, in the remainder we refer to thebiological information associated to a gene i (e.g., the set of its annotations)as  the  set  of  its  labels,  denoted  by  labels(i). BRW ranks genes according to the following steps:
 - We compute the set of statistically significant annotations of known disease gene
@@ -30,16 +30,45 @@ The  Biological  Random  Walk  heuristic  provides  a  framework  to  integrateh
 
 Biological Random  Walks flow propagation: given the seed nodes (star nodes), the flow propagates to his neighbors. The BRW not only propagatethe  flow  around  them  but  also  teleports  the  flow  to  the  target  of  the  BTP  nodes  (blue  arrows).  So  it  discovers  nodes  that  are  biologically  correlated  to  theseed nodes (just through the BTP, left-lower test node) and those nodes that aren’t reached directly to the BTP but are close to many related nodes.
 
-### Python Libraries
+## Python Libraries
 Imported libraries and their version:
 
 - numpy, version 1.19.1
 - networkx, version 2.4
 - sklearn, version 0.23.1 
 
-### Toy Examples
 
-Please go the the directory BiologicalRqndomWalks/toy_example to see the inputs format of BRW. 
+
+## Data Preprocessing
+
+### Computing the Ontology Graph
+
+To compute the ontology graph, run the following scripts:
+
+ ```
+ cd data_preprocessing
+ ```
+ 
+ ```
+ python3 compute_ontology_graph.py -go <path to .gaf file> -r <path to Reactome file> -k <path to KEGG. file> -o <output file path>  
+ ```
+The file used in the manuscript can be downloaded at: https://drive.google.com/file/d/12oDaaEs1vso82UXsRe2AWeoGqNccZuLM/view?usp=sharing
+
+
+### Computing the Tumor-Control Table TCGA
+
+To compute Tumor and Control Table for each Tumor taken in consideration in the article, run the following scripts:
+
+ ```
+ cd data_preprocessing
+ ```
+ 
+ ```
+ python3 TCGA_analyzer.py -gss <path to gdc sheet file> -m <path to manifest file> -rna_dir <path rna dir downloaded using cdc-client> -o <output dir path>  
+```
+the rna_dir downloaded using de cdc-client can be found at the following link:
+gdc sheet and manifest file can be found in the data_set/TCGA/ directory
+
 
 ### Input files and formats
 
