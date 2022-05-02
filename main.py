@@ -15,11 +15,13 @@ if __name__ == '__main__':
 	parser.add_argument('-c',default = None)
 
 	parser.add_argument('-do',default = None)
-
 	parser.add_argument('-a',default = None)
 
 	parser.add_argument('-o',default = None)
-	parser.add_argument('-r',default = 0.75)
+	
+	parser.add_argument('-r',default = 0.9)
+	parser.add_argument('-x',default = 0.5)
+	parser.add_argument('-y',default = 0.5)
 
 
 	args = parser.parse_args()
@@ -85,6 +87,14 @@ if __name__ == '__main__':
 	if len(personalization_vector_creation_policies) == 0:
 		personalization_vector_creation_policies.append("default")
 
+	
+
+	r = float(args.r)
+	
+	alpha = float(args.x)
+	beta = float(args.y)
+
+
 	brw = BiologicalRandomWalks(
 			
 		seed_file_path = seed_file_path,
@@ -102,7 +112,10 @@ if __name__ == '__main__':
 		personalization_vector_creation_policies = personalization_vector_creation_policies,
 		personalization_vector_aggregation_policy = "Sum",
 
-		restart_prob = args.r,
+		restart_prob = r,
+
+		alpha = alpha,
+		beta = beta,
 
 		network_weight_flag = network_weight_flag,
 
