@@ -168,7 +168,7 @@ if __name__ == '__main__':
 
 	c = TCGAAnalyzer(
 		
-		sample_sheet_file_path =args.gss,
+		sample_sheet_file_path =args.gdc,
 		manifest_file_path = args.m,
 		TCGA_directory_path = args.rna_dir,
 		output_dir_path = args.o
