@@ -41,7 +41,10 @@ Imported libraries and their version:
 
 ## Data Preprocessing
 
+
 ### Computing the Ontology Graph
+
+BRW requires in the Ontology Graph to bias the teleporting probability e the transition matrix. It is a multilayer bipartite graph G(V,E) where V consists of two types of nodes: genes and ontologies. There is an edge between a gene and an ontology if that gene is involved in that ontology. Each layer represents a dataset (GO, KEGG, and Reactome)
 
 To compute the ontology graph, run the following commands:
 
@@ -52,17 +55,28 @@ To compute the ontology graph, run the following commands:
  ```
  python3 compute_ontology_graph.py -go <path to .gaf file> -r <path to Reactome file> -k <path to KEGG file> -o <output file path>  
  ```
-The file used in the manuscript can be downloaded at: https://drive.google.com/file/d/12oDaaEs1vso82UXsRe2AWeoGqNccZuLM/view?usp=sharing
+The files used in the manuscript can be downloaded at: https://drive.google.com/file/d/12oDaaEs1vso82UXsRe2AWeoGqNccZuLM/view?usp=sharing
 An update version of the .gaf file can be downloaded from Gene Onotology Consortium at the following link: http://current.geneontology.org/products/pages/downloads.html
 
 The Reactome file can be downloaded at https://reactome.org/download-data (Uniprot to all pathways)
 The KEGG file has been downloaded using KEGG rest api.
 
-The ontology graph has the following structre:
+The ontology graph will have the following structre:
 ```
  < ensembl_id > \t < annotation_id > \t < dataset_name >
 ```
 
+### Computing disease specific ontology
+
+To compute the set of statistically significant disease annotations run the followings commands 
+
+ ```
+ cd data_preprocessing
+ ```
+ 
+```
+python3 compute_disease_specific_ontologies.py -s <path to seed set> -a <path to ontology network> -o <output file path>
+```
 
 ### Computing the Tumor-Control Table TCGA
 
