@@ -53,8 +53,9 @@ To compute the ontology graph, run the following commands:
  python3 compute_ontology_graph.py -go <path to .gaf file> -r <path to Reactome file> -k <path to KEGG file> -o <output file path>  
  ```
 The file used in the manuscript can be downloaded at: https://drive.google.com/file/d/12oDaaEs1vso82UXsRe2AWeoGqNccZuLM/view?usp=sharing
-The .gaf file can be downloaded from Gene Onotology consortium at the following link: http://current.geneontology.org/products/pages/downloads.html
-The Reactome file can be downloaded at https://reactome.org/download-data (Click on Uniprot to all pathways)
+An update version of the .gaf file can be downloaded from Gene Onotology Consortium at the following link: http://current.geneontology.org/products/pages/downloads.html
+
+The Reactome file can be downloaded at https://reactome.org/download-data (Uniprot to all pathways)
 The KEGG file has been downloaded using KEGG rest api.
 
 The ontology graph has the following structre:
@@ -72,7 +73,7 @@ To compute Tumor and Control Table for each Tumor taken in consideration in the 
  ```
  
  ```
- python3 TCGA_analyzer.py -gss <path to gdc sheet file> -m <path to manifest file> -rna_dir <path rna dir downloaded using cdc-client> -o <output dir path>  
+ python3 TCGA_analyzer.py -gdc <path to gdc sheet file> -m <path to manifest file> -rna_dir <path rna dir downloaded using cdc-client> -o <output dir path>  
 ```
 The gdc sheet and manifest files that we have used in the manuscript can be found in the data_set/TCGA directory. The rna_seq file downloaded using cdc-client with the gdc sheet and manifest files is to heavy to be uploaded here. Thus, It can be found at the following link: https://drive.google.com/file/d/1f2V6fji8dPshiH6ohV81K0Cxv9q5D4ew/view?usp=sharing
 
@@ -143,7 +144,7 @@ To Run the algorithm described in [1], all the options are required,to choose th
 ### Example
 
  ```
- python3 main.py -p toy_example/ppi_network.tsv -c toy_example/co_expression_network.tsv -s toy_example/seed_set.tsv -de toy_example/de_genes.tsv -a toy_example/annotations.tsv -do toy_example/disease_ontology.tsv -o toy_example/output.tsv
+ python3 main.py -p <ppi network file path> -c <path to co-expressiion network> -s <path to seed set> -de <path to de genes> -a <path to ontology graph> -do <path to seed enriched ontologies> -o <output file path>
  ```
 
 
