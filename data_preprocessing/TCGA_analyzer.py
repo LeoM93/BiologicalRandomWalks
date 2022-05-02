@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
 	
-	parser.add_argument('-gss',default = None)
+	parser.add_argument('-gdc',default = None)
 	parser.add_argument('-m',default = None)
 	parser.add_argument('-rna_dir',default = None)
 
@@ -165,14 +165,6 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	c = TCGAAnalyzer(
-		
-		sample_sheet_file_path = "/Users/leonardomartini/Documents/network_medicine/Data/db/TCGA/RNA_seq/gdc_sample_sheet.2022-02-08.tsv",
-		manifest_file_path = "/Users/leonardomartini/Documents/network_medicine/Data/db/TCGA/RNA_seq/gdc_manifest_20220208_095922.txt",
-		TCGA_directory_path = "/Users/leonardomartini/Documents/network_medicine/Data/db/TCGA/RNA_seq/",
-		output_dir_path = "/Users/leonardomartini/Documents/network_medicine/BRW/data_set/TCGA/Gene_Expression_T_C/"
-		
-		)
 
 	c = TCGAAnalyzer(
 		
